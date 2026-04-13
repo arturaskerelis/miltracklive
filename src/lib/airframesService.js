@@ -94,6 +94,15 @@ function getAircraftType(msg, text = '') {
 
 function extractAirportPairFromRawINI(rawSource = "") {
   const normalized = rawSource.toUpperCase().replace(/\s+/g, '');
+
+  const pairBeforeFinalSlash = normalized.match(/([A-Z]{4}),([A-Z]{4})(?=\/[^/]*$)/);
+  if (pairBeforeFinalSlash) {
+    return {
+      departure: pairBeforeFinalSlash[1],
+      destination: pairBeforeFinalSlash[2],
+    };
+  }
+
   const allPairs = [...normalized.matchAll(/([A-Z]{4}),([A-Z]{4})/g)];
   if (allPairs.length === 0) return null;
 
