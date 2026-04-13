@@ -7,6 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { decodeMessage, getMessageCategory } from "../lib/decoder";
 import moment from "moment";
 
+function extractCallsignFromRawText(rawText = "") {
+  const cleaned = rawText.replace(/^FTX\/ID\s*/i, '').trim();
+  const firstToken = cleaned.split(/\s+/)[0]?.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  return firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken) ? firstToken : "UNKNWN";
+}
+
 export default function MessageCard({ message, flight, isHighlighted, onClick, timezone = "UTC" }) {
   const now = useNow();
   const [showRaw, setShowRaw] = useState(false);
@@ -21,6 +27,9 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
   };
   const decoded = message.decoded || decodeMessage(message.rawText);
   const category = getMessageCategory(message.rawText);
+  const displayCallsign = message.callsign && message.callsign !== "UNKNWN"
+    ? message.callsign
+    : extractCallsignFromRawText(message.rawText);
 
   return (
     <button
@@ -33,7 +42,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono font-semibold text-sm text-foreground">
-            {message.callsign}
+            {displayCallsign}
           </span>
           {flight && flight.departure && flight.destination && (
             <span className="font-mono text-[10px] text-muted-foreground/70">
@@ -62,7 +71,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
           <div className="flex items-start gap-2">
             <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
             <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
-              {message.rawText.replace(/^FTX\/ID\s*/i, '').replace(new RegExp(`^${message.callsign}\\s*`, 'i'), '')}
+              {message.rawText.replace(/^FTX\/ID\s*/i, '').replace(new RegExp(`^${displayCallsign}\\s*`, 'i'), '')}
             </p>
           </div>
         ) : (
