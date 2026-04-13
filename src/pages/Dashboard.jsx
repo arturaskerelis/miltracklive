@@ -67,6 +67,8 @@ export default function Dashboard() {
         isRefreshing={isRefreshing}
         timezone={timezone}
         onTimezoneChange={setTimezone}
+        selectedFlight={selectedFlight}
+        onClearSelection={() => setSelectedFlight(null)}
       />
 
       {isLoading && <LiveDataLoadingPlaceholder />}

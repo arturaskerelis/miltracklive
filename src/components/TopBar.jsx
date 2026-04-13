@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Radar, Sun, Moon, RefreshCw, Clock } from "lucide-react";
+import { Radar, Sun, Moon, RefreshCw, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,6 +27,8 @@ export default function TopBar({
   isRefreshing,
   timezone,
   onTimezoneChange,
+  selectedFlight,
+  onClearSelection,
 }) {
   const [dark, setDark] = useState(true);
   const clockTime = useZuluClock(timezone);
@@ -37,7 +39,7 @@ export default function TopBar({
   }, [dark]);
 
   return (
-    <header className="h-14 border-b border-border bg-card/80 backdrop-blur-xl flex items-center px-4 gap-3 shrink-0 z-50">
+    <header className="relative h-14 border-b border-border bg-card/80 backdrop-blur-xl flex items-center px-4 gap-3 shrink-0 z-50">
       {/* Logo */}
       <div className="flex items-center gap-2 mr-2">
         <div className="relative">
@@ -82,6 +84,20 @@ export default function TopBar({
       </Select>
 
 
+
+      {selectedFlight && (
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-3 text-xs font-mono"
+            onClick={onClearSelection}
+          >
+            <X className="w-3.5 h-3.5" />
+            Clear Selection
+          </Button>
+        </div>
+      )}
 
       {/* Stats + Controls */}
       <div className="ml-auto flex items-center gap-3">
