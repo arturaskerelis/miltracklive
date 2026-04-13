@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from "react-leaflet";
 import { Crosshair } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -101,6 +101,7 @@ const militaryBases = airportCoordinates;
 
 export default function MapPanel({ flights, messages = [], selectedFlight, onSelectFlight }) {
   const [liveAircraft, setLiveAircraft] = useState([]);
+  const [dynamicAirports, setDynamicAirports] = useState({});
   const [hoveredFlight, setHoveredFlight] = useState(null);
 
   useEffect(() => {
@@ -117,9 +118,31 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    async function fetchAirportCoordinates() {
+      const missingCodes = [...new Set(
+        flights.flatMap((flight) => [flight.departure, flight.destination])
+          .filter((code) => code && !airportCoordinates[code] && !dynamicAirports[code])
+      )];
+
+      if (missingCodes.length === 0) return;
+
+      try {
+        const res = await base44.functions.invoke('airportLookup', { codes: missingCodes });
+        setDynamicAirports((current) => ({ ...current, ...(res.data?.airports || {}) }));
+      } catch (e) {
+        console.warn('airportLookup failed:', e.message);
+      }
+    }
+
+    fetchAirportCoordinates();
+  }, [flights, dynamicAirports]);
+
+  const allAirports = useMemo(() => ({ ...airportCoordinates, ...dynamicAirports }), [dynamicAirports]);
+
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
-  const flightsWithKnownRoutes = flights.filter((f) => militaryBases[f.departure] && militaryBases[f.destination]);
-  const filedFlights = flights.filter((f) => f.status === "filed" && militaryBases[f.departure]);
+  const flightsWithKnownRoutes = flights.filter((f) => allAirports[f.departure] && allAirports[f.destination]);
+  const filedFlights = flights.filter((f) => f.status === "filed" && allAirports[f.departure]);
   const selectedKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === selectedFlight);
   const hoveredKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === hoveredFlight);
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
@@ -149,8 +172,8 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
 
         {/* Background route lines for ACARS flights */}
         {enRouteFlights.filter((flight) => flight.id !== selectedFlight).map((flight) => {
-          const depCoords = militaryBases[flight.departure];
-          const destCoords = militaryBases[flight.destination];
+          const depCoords = allAirports[flight.departure];
+          const destCoords = allAirports[flight.destination];
           if (!depCoords || !destCoords) return null;
           return (
             <Polyline
@@ -206,7 +229,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
 
         {/* Filed flight markers at departure airport */}
         {filedFlights.map((flight) => {
-          const departureCoords = militaryBases[flight.departure];
+          const departureCoords = allAirports[flight.departure];
           if (!departureCoords) return null;
           return (
             <Marker
@@ -277,13 +300,13 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
             key={`selected-route-${selectedKnownRouteFlight.id}`}
             positions={selectedKnownRouteFlight.lat && selectedKnownRouteFlight.lng
               ? [
-                  militaryBases[selectedKnownRouteFlight.departure],
+                  allAirports[selectedKnownRouteFlight.departure],
                   [selectedKnownRouteFlight.lat, selectedKnownRouteFlight.lng],
-                  militaryBases[selectedKnownRouteFlight.destination],
+                  allAirports[selectedKnownRouteFlight.destination],
                 ]
               : [
-                  militaryBases[selectedKnownRouteFlight.departure],
-                  militaryBases[selectedKnownRouteFlight.destination],
+                  allAirports[selectedKnownRouteFlight.departure],
+                  allAirports[selectedKnownRouteFlight.destination],
                 ]}
             pathOptions={{
               color: getBranchHexColor(selectedKnownRouteFlight.branch),
@@ -299,13 +322,13 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
             key={`hovered-route-${hoveredKnownRouteFlight.id}`}
             positions={hoveredKnownRouteFlight.lat && hoveredKnownRouteFlight.lng
               ? [
-                  militaryBases[hoveredKnownRouteFlight.departure],
+                  allAirports[hoveredKnownRouteFlight.departure],
                   [hoveredKnownRouteFlight.lat, hoveredKnownRouteFlight.lng],
-                  militaryBases[hoveredKnownRouteFlight.destination],
+                  allAirports[hoveredKnownRouteFlight.destination],
                 ]
               : [
-                  militaryBases[hoveredKnownRouteFlight.departure],
-                  militaryBases[hoveredKnownRouteFlight.destination],
+                  allAirports[hoveredKnownRouteFlight.departure],
+                  allAirports[hoveredKnownRouteFlight.destination],
                 ]}
             pathOptions={{
               color: getBranchHexColor(hoveredKnownRouteFlight.branch),
