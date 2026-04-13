@@ -61,18 +61,10 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
       </div>
 
       <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           <CalendarDays className="w-3 h-3" />
           <span>{formatInTZ(flight.etd, timezone, "DD MMM HH:mm")}</span>
-          {flight.etd && flight.status !== 'en-route' && (() => {
-            const diffMs = new Date(flight.etd).getTime() - now;
-            if (diffMs > 0) {
-              const h = Math.floor(diffMs / 3600000);
-              const m = Math.floor((diffMs % 3600000) / 60000);
-              return <span className="opacity-60">· initiates in {h > 0 ? `${h}h ` : ''}{m}m</span>;
-            }
-            return <span className="opacity-50">· {relativeTime(flight.etd, now)}</span>;
-          })()}
+          {flight.etd && <span className="opacity-50">· filed {relativeTime(flight.etd, now)}</span>}
           {flight.altitude > 0 && (
             <><span className="opacity-40 mx-1">·</span><span>FL{Math.round(flight.altitude / 100)}</span></>
           )}
