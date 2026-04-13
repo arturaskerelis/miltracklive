@@ -94,17 +94,17 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
         </div>
       </div>
 
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-2 min-w-0">
         <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-        <p className="text-sm leading-relaxed text-foreground/90 break-words overflow-hidden">
+        <p className="min-w-0 flex-1 text-sm leading-relaxed text-foreground/90 break-all whitespace-pre-wrap">
           {decoded}
         </p>
       </div>
 
       {showRaw && message.rawText && (
-        <div className="mt-2 flex items-start gap-2">
+        <div className="mt-2 flex items-start gap-2 min-w-0">
           <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
-          <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all overflow-hidden max-w-full">
+          <p className="min-w-0 flex-1 text-xs font-mono leading-relaxed text-muted-foreground break-all whitespace-pre-wrap">
             {message.rawText.replace(/,[A-Z0-9]{4}$/i, '')}
           </p>
         </div>
