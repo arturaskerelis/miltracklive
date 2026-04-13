@@ -92,6 +92,22 @@ function getAircraftType(msg, text = '') {
   return acTypeMatch?.[1]?.toUpperCase() || acTypeMatch?.[0]?.toUpperCase() || getTail(msg) || getHex(msg).toUpperCase() || "UNKNOWN";
 }
 
+function extractAirportPairFromRawINI(rawSource = "") {
+  const normalized = rawSource.toUpperCase().replace(/\s+/g, '');
+  const allPairs = [...normalized.matchAll(/([A-Z]{4}),([A-Z]{4})/g)];
+  if (allPairs.length === 0) return null;
+
+  for (let i = allPairs.length - 1; i >= 0; i -= 1) {
+    const [, departure, destination] = allPairs[i];
+    if (departure !== destination || allPairs.length === 1) {
+      return { departure, destination };
+    }
+  }
+
+  const [, departure, destination] = allPairs[allPairs.length - 1];
+  return { departure, destination };
+}
+
 // Fetch INI (flight plan / position init) messages via backend proxy
 export async function fetchINIMessages() {
   const res = await base44.functions.invoke('airframesProxy', { type: 'INI' });
@@ -109,17 +125,14 @@ export function parseINItoFlightPlan(msg) {
   const text = msg.text || "";
   const rawSource = [msg.text, msg.rawAcars, msg.message, msg.body].filter(Boolean).join(" ");
 
-  // Try to extract route — prefer the segment before the final slash, e.g. /AFOTBH,ETAR/ => OTBH, ETAR
   let departure = "????";
   let destination = "????";
-  const routeBeforeFinalSlash = rawSource.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\//i);
-  const routePair = rawSource.match(/(?:^|\/|,)([A-Z]{4}),([A-Z]{4})(?=\/|,|$)/i);
+  const airportPair = extractAirportPairFromRawINI(rawSource);
   const routeSlash = rawSource.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
   const routeDot = rawSource.match(/([A-Z]{4})[/.]([A-Z]{4})/);
   const depDest = rawSource.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
   const orgDest = rawSource.match(/ORG[/\s]*([A-Z]{4}).*?DST[/\s]*([A-Z]{4})/i);
-  if (routeBeforeFinalSlash) { departure = routeBeforeFinalSlash[2]; destination = routeBeforeFinalSlash[3]; }
-  else if (routePair) { departure = routePair[1]; destination = routePair[2]; }
+  if (airportPair) { departure = airportPair.departure; destination = airportPair.destination; }
   else if (routeSlash) { departure = routeSlash[1]; destination = routeSlash[2]; }
   else if (depDest) { departure = depDest[1]; destination = depDest[2]; }
   else if (orgDest) { departure = orgDest[1]; destination = orgDest[2]; }
