@@ -96,7 +96,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
 
       <div className="flex items-start gap-2">
         <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-        <p className="text-sm leading-relaxed text-foreground/90">
+        <p className="text-sm leading-relaxed text-foreground/90 break-words overflow-hidden">
           {decoded}
         </p>
       </div>
@@ -104,7 +104,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
       {showRaw && message.rawText && (
         <div className="mt-2 flex items-start gap-2">
           <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
-          <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
+          <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all overflow-hidden max-w-full">
             {message.rawText.replace(/,[A-Z0-9]{4}$/i, '')}
           </p>
         </div>
