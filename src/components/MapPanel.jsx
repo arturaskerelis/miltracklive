@@ -122,6 +122,9 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
 
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
   const filedFlights = flights.filter((f) => f.status === "filed" && militaryBases[f.departure]);
+  const selectedKnownRouteFlight = flights.find(
+    (flight) => flight.id === selectedFlight && militaryBases[flight.departure] && militaryBases[flight.destination]
+  );
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
@@ -165,19 +168,35 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           );
         })}
 
-        {/* Hover route lines for filed flights */}
+        {/* Route lines for selected or hovered flights with known routes */}
+        {selectedKnownRouteFlight && !selectedKnownRouteFlight.lat && (
+          <Polyline
+            key={`selected-route-${selectedKnownRouteFlight.id}`}
+            positions={[
+              militaryBases[selectedKnownRouteFlight.departure],
+              militaryBases[selectedKnownRouteFlight.destination],
+            ]}
+            pathOptions={{
+              color: getBranchHexColor(selectedKnownRouteFlight.branch),
+              weight: 4,
+              opacity: 0.95,
+              dashArray: "6 6",
+            }}
+          />
+        )}
+
         {filedFlights.map((flight) => {
           const depCoords = militaryBases[flight.departure];
           const destCoords = militaryBases[flight.destination];
           const isActive = hoveredFlight === flight.id || selectedFlight === flight.id;
-          if (!depCoords || !destCoords || !isActive) return null;
+          if (!depCoords || !destCoords || !isActive || selectedFlight === flight.id) return null;
           return (
             <Polyline
               key={`filed-route-${flight.id}`}
               positions={[depCoords, destCoords]}
               pathOptions={{
                 color: getBranchHexColor(flight.branch),
-                weight: selectedFlight === flight.id ? 4 : 3,
+                weight: 3,
                 opacity: 0.9,
                 dashArray: "6 6",
               }}
