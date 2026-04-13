@@ -45,7 +45,7 @@ export default function FreeTextFeed({ messages, flights = [], selectedFlight, o
             key={msg.id}
             message={msg}
             flight={flightMap[msg.flightPlanId] || null}
-            isHighlighted={selectedFlight === msg.flightPlanId}
+            isHighlighted={selectedFlight === msg.flightPlanId && !!msg.flightPlanId}
             onClick={onMessageClick}
             timezone={timezone}
           />

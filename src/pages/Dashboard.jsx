@@ -26,7 +26,9 @@ export default function Dashboard() {
   };
 
   const handleMessageClick = (msg) => {
-    setSelectedFlight(msg.flightPlanId);
+    if (msg.flightPlanId) {
+      setSelectedFlight(msg.flightPlanId);
+    }
   };
 
   return (

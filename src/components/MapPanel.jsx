@@ -127,8 +127,8 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
               positions={[depCoords, [flight.lat, flight.lng], destCoords]}
               pathOptions={{
                 color: getBranchHexColor(flight.branch),
-                weight: selectedFlight === flight.id ? 2.5 : 1,
-                opacity: selectedFlight === flight.id ? 0.8 : 0.25,
+                weight: selectedFlight === flight.id ? 4 : 1,
+                opacity: selectedFlight === flight.id ? 0.95 : 0.25,
                 dashArray: "8 6",
               }}
             />
@@ -140,6 +140,7 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
           <Marker
             key={flight.id}
             position={[flight.lat, flight.lng]}
+            zIndexOffset={selectedFlight === flight.id ? 1000 : 0}
             icon={createAircraftIcon(getBranchHexColor(flight.branch), selectedFlight === flight.id)}
             eventHandlers={{ click: () => onSelectFlight(flight.id) }}
           >
