@@ -45,12 +45,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
         </div>
       </div>
 
-      {/* Raw ACARS */}
-      <div className="font-mono text-[11px] text-muted-foreground/60 bg-muted/40 rounded px-2 py-1.5 mb-2 break-all leading-relaxed">
-        {message.rawText}
-      </div>
-
-      {/* Decoded — the hero */}
+      {/* Decoded */}
       <div className="relative">
         <div className="flex items-start gap-2">
           <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
