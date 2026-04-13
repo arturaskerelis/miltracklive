@@ -39,15 +39,15 @@ export default function TopBar({
   }, [dark]);
 
   return (
-    <header className="relative h-14 border-b border-border bg-card/80 backdrop-blur-xl flex items-center px-4 gap-3 shrink-0 z-50">
+    <header className="relative min-h-14 border-b border-border bg-card/80 backdrop-blur-xl flex flex-wrap items-center px-3 py-2 gap-2 shrink-0 z-50 md:h-14 md:flex-nowrap md:px-4 md:py-0 md:gap-3">
       {/* Logo */}
-      <div className="flex items-center gap-2 mr-2">
+      <div className="flex min-w-0 items-center gap-2 md:mr-2">
         <div className="relative">
           <Radar className="w-6 h-6 text-primary" />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full animate-pulse-glow" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="font-semibold text-base tracking-tight">
+          <span className="font-semibold text-sm tracking-tight md:text-base">
             MilTrack <span className="text-primary">Live</span>
             <span className="ml-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Beta</span>
           </span>
@@ -63,7 +63,7 @@ export default function TopBar({
       </div>
 
       {/* Live Clock */}
-      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-muted/40">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-border bg-muted/40">
         <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
         <span className="font-mono text-sm tabular-nums font-medium">{clockTime}</span>
         <span className="font-mono text-[10px] text-muted-foreground">{tzLabel}</span>
@@ -71,7 +71,7 @@ export default function TopBar({
 
       {/* Timezone selector */}
       <Select value={timezone} onValueChange={onTimezoneChange}>
-        <SelectTrigger className="h-8 text-xs w-36 font-mono">
+        <SelectTrigger className="h-8 text-xs w-28 font-mono md:w-36">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="z-[9999]">
@@ -86,11 +86,11 @@ export default function TopBar({
 
 
       {selectedFlight && (
-        <div className="absolute left-1/2 -translate-x-1/2">
+        <div className="order-last w-full md:absolute md:left-1/2 md:order-none md:w-auto md:-translate-x-1/2">
           <Button
             variant="outline"
             size="sm"
-            className="h-8 px-3 text-xs font-mono"
+            className="h-8 w-full px-3 text-xs font-mono md:w-auto"
             onClick={onClearSelection}
           >
             <X className="w-3.5 h-3.5" />
@@ -100,7 +100,7 @@ export default function TopBar({
       )}
 
       {/* Stats + Controls */}
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-2 md:gap-3">
         <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
           <Badge variant="outline" className="font-mono text-[10px] px-2 py-0.5 border-primary/30 text-primary">
             {flightCount} flights

@@ -4,12 +4,14 @@ import FlightPlansPanel from "../components/FlightPlansPanel";
 import MapPanel from "../components/MapPanel";
 import FreeTextFeed from "../components/FreeTextFeed";
 import LiveDataLoadingPlaceholder from "../components/LiveDataLoadingPlaceholder";
+import MobileDashboardTabs from "../components/MobileDashboardTabs";
 import useAirframesData from "../hooks/useAirframesData";
 
 export default function Dashboard() {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [timezone, setTimezone] = useState("UTC");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState("flights");
   const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch, isLoading } = useAirframesData();
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function Dashboard() {
   const handleMessageClick = (msg) => {
     if (msg.flightPlanId) {
       handleSelectFlight(msg.flightPlanId);
+      setActiveMobileTab("flights");
     }
   };
 
@@ -73,10 +76,8 @@ export default function Dashboard() {
 
       {isLoading && <LiveDataLoadingPlaceholder />}
 
-      {/* Desktop: 3-panel layout / Mobile: tab-based */}
       <div className="flex-1 overflow-hidden">
-        {/* Desktop layout (hidden on mobile) */}
-        <div className="grid grid-cols-12 h-full">
+        <div className="hidden md:grid md:grid-cols-12 h-full">
           <div className="col-span-3 overflow-hidden">
             <FlightPlansPanel
               flights={filteredFlights}
@@ -102,6 +103,38 @@ export default function Dashboard() {
               onMessageClick={handleMessageClick}
               timezone={timezone}
             />
+          </div>
+        </div>
+
+        <div className="flex h-full flex-col md:hidden">
+          <MobileDashboardTabs activeTab={activeMobileTab} onTabChange={setActiveMobileTab} />
+          <div className="flex-1 overflow-hidden">
+            {activeMobileTab === "flights" && (
+              <FlightPlansPanel
+                flights={filteredFlights}
+                messages={filteredMessages}
+                selectedFlight={selectedFlight}
+                onSelectFlight={handleSelectFlight}
+                timezone={timezone}
+              />
+            )}
+            {activeMobileTab === "map" && (
+              <MapPanel
+                flights={filteredFlights}
+                messages={filteredMessages}
+                selectedFlight={selectedFlight}
+                onSelectFlight={handleSelectFlight}
+              />
+            )}
+            {activeMobileTab === "messages" && (
+              <FreeTextFeed
+                messages={filteredMessages}
+                flights={filteredFlights}
+                selectedFlight={selectedFlight}
+                onMessageClick={handleMessageClick}
+                timezone={timezone}
+              />
+            )}
           </div>
         </div>
       </div>
