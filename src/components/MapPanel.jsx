@@ -87,12 +87,16 @@ function toLatLng(lat, lng) {
 function FlyToSelected({ flights, selectedFlight }) {
   const map = useMap();
   useEffect(() => {
-    if (selectedFlight) {
-      const flight = flights.find((f) => f.id === selectedFlight);
-      if (flight && hasValidCoords(flight.lat, flight.lng)) {
-        map.flyTo(toLatLng(flight.lat, flight.lng), 5, { duration: 1 });
-      }
-    }
+    if (!selectedFlight) return;
+
+    const flight = flights.find((f) => f.id === selectedFlight);
+    if (!flight) return;
+
+    const lat = Number(flight.lat);
+    const lng = Number(flight.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    map.flyTo([lat, lng], 5, { duration: 1 });
   }, [selectedFlight, flights, map]);
   return null;
 }
@@ -229,7 +233,13 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
               ],
               flight.departure && flight.destination ? `${flight.departure} → ${flight.destination}` : ""
             )}
-            eventHandlers={{ click: () => onSelectFlight(flight.id) }}
+            eventHandlers={{
+              click: () => {
+                if (hasValidCoords(flight.lat, flight.lng)) {
+                  onSelectFlight(flight.id);
+                }
+              },
+            }}
           >
             <Popup className="military-popup">
               <div className="min-w-48">
@@ -266,7 +276,11 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
                 flight.departure && flight.destination ? `${flight.departure} → ${flight.destination}` : ""
               )}
               eventHandlers={{
-                click: () => onSelectFlight(flight.id),
+                click: () => {
+                  if (departureCoords) {
+                    onSelectFlight(flight.id);
+                  }
+                },
               }}
             >
               <Popup className="military-popup">
