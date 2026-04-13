@@ -108,14 +108,16 @@ export async function fetchFTXMessages() {
 export function parseINItoFlightPlan(msg) {
   const text = msg.text || "";
 
-  // Try to extract route — various formats: KDOV.ETAR, KDOV/ETAR, .KDOV/ETAR., DEP/KDOV DEST/ETAR
+  // Try to extract route — prefer the segment before the final slash, e.g. /AFOTBH,ETAR/ => OTBH, ETAR
   let departure = "????";
   let destination = "????";
+  const routeBeforeFinalSlash = text.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\/[A-Z0-9]+$/i);
   const routeSlash = text.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
   const routeDot = text.match(/([A-Z]{4})[/.]([A-Z]{4})/);
   const depDest = text.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
   const orgDest = text.match(/ORG[/\s]*([A-Z]{4}).*?DST[/\s]*([A-Z]{4})/i);
-  if (routeSlash) { departure = routeSlash[1]; destination = routeSlash[2]; }
+  if (routeBeforeFinalSlash) { departure = routeBeforeFinalSlash[2]; destination = routeBeforeFinalSlash[3]; }
+  else if (routeSlash) { departure = routeSlash[1]; destination = routeSlash[2]; }
   else if (depDest) { departure = depDest[1]; destination = depDest[2]; }
   else if (orgDest) { departure = orgDest[1]; destination = orgDest[2]; }
   else if (routeDot) { departure = routeDot[1]; destination = routeDot[2]; }
