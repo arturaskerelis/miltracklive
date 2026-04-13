@@ -1,10 +1,12 @@
 import { Plane, Clock, ArrowRight, CalendarDays } from "lucide-react";
+import useNow from "../hooks/useNow";
+import { relativeTime } from "../lib/relativeTime";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getStatusColor, getBranchColor } from "../lib/mockData";
 import moment from "moment";
 
-function FlightRow({ flight, isSelected, onSelect }) {
+function FlightRow({ flight, isSelected, onSelect, now }) {
   const statusClass = getStatusColor(flight.status);
   const branchClass = getBranchColor(flight.branch);
 
@@ -38,6 +40,9 @@ function FlightRow({ flight, isSelected, onSelect }) {
         <div className="flex items-center gap-1">
           <CalendarDays className="w-3 h-3" />
           <span>{moment(flight.etd).format("DD MMM HH:mm")}Z</span>
+          {relativeTime(flight.etd, now) && (
+            <span className="opacity-50">· {relativeTime(flight.etd, now)}</span>
+          )}
           {flight.altitude > 0 && (
             <><span className="opacity-40 mx-1">·</span><span>FL{Math.round(flight.altitude / 100)}</span></>
           )}
@@ -49,6 +54,7 @@ function FlightRow({ flight, isSelected, onSelect }) {
 }
 
 export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlight }) {
+  const now = useNow();
   const sorted = [...flights].sort((a, b) => new Date(b.etd) - new Date(a.etd));
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
@@ -73,6 +79,7 @@ export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlig
             flight={flight}
             isSelected={selectedFlight === flight.id}
             onSelect={onSelectFlight}
+            now={now}
           />
         ))}
         {sorted.length === 0 && (
