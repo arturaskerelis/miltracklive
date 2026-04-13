@@ -75,13 +75,11 @@ export default function useAirframesData() {
           return true;
         });
         const parsedMessages = uniqueFtxRaw.map((msg) => {
-          // Extract callsign from flight field or first token of text
-          let cs = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').trim().toUpperCase();
-          if (!cs) {
-            const firstToken = (msg.text || '').trim().split(/\s+/)[0];
-            if (firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken)) cs = firstToken;
-          }
-          return parseFTXtoMessage(msg, callsignToId.get(cs) || null);
+          const parsedMessage = parseFTXtoMessage(msg, null);
+          return {
+            ...parsedMessage,
+            flightPlanId: callsignToId.get(parsedMessage.callsign) || null,
+          };
         });
 
         // Batch AI-decode the real ACARS messages

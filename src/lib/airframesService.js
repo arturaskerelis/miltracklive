@@ -23,12 +23,34 @@ function getCallsign(msg) {
   return String(msg.flight);
 }
 
+function getHex(msg) {
+  if (typeof msg.airframe === 'object' && msg.airframe !== null) {
+    return msg.airframe.hex || msg.airframe.icaoHex || '';
+  }
+  return msg.hex || msg.icaoHex || '';
+}
+
+function extractCallsignFromText(text) {
+  const cleaned = (text || '').trim().toUpperCase();
+  const firstToken = cleaned.split(/\s+/)[0]?.replace(/[^A-Z0-9]/g, '');
+  if (firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken)) {
+    return firstToken;
+  }
+  return '';
+}
+
 // Extract tail from message
 function getTail(msg) {
   if (typeof msg.airframe === 'object' && msg.airframe !== null) {
     return msg.airframe.tail || '';
   }
   return msg.tail || '';
+}
+
+function getAircraftType(msg, text = '') {
+  const acTypeMatch = text.match(/\/([A-Z][0-9A-Z]{2,5})\//) ||
+    text.match(/\b(C17A?|C-17A?|C5M?|C-5M?|KC135|KC-135|KC10|KC-10|C130J?|C-130J?|B52H?|B-52H?|P8A?|P-8A?|A400M?|F16C?|F-16C?|E3|E-3|E8|E-8|RC135|RC-135|WC135|WC-135|707|727|737|747|757|767|777|MD11|DC10|L100)\b/i);
+  return acTypeMatch?.[1]?.toUpperCase() || acTypeMatch?.[0]?.toUpperCase() || getTail(msg) || getHex(msg).toUpperCase() || "UNKNOWN";
 }
 
 // Fetch INI (flight plan / position init) messages via backend proxy
@@ -59,12 +81,9 @@ export function parseINItoFlightPlan(msg) {
   else if (orgDest) { departure = orgDest[1]; destination = orgDest[2]; }
   else if (routeDot) { departure = routeDot[1]; destination = routeDot[2]; }
 
-  // Aircraft type — from text patterns, ICAO type field (/B752/, /C17 etc), or tail
-  const acTypeMatch = text.match(/\/([A-Z][0-9A-Z]{2,5})\//) ||
-    text.match(/\b(C17A?|C-17A?|C5M?|C-5M?|KC135|KC-135|KC10|KC-10|C130J?|C-130J?|B52H?|B-52H?|P8A?|P-8A?|A400M?|F16C?|F-16C?|E3|E-3|E8|E-8|RC135|RC-135|WC135|WC-135|707|727|737|747|757|767|777|MD11|DC10|L100)\b/i);
-  const aircraftType = acTypeMatch?.[1]?.toUpperCase() || acTypeMatch?.[0]?.toUpperCase() || getTail(msg) || "UNKNOWN";
+  const aircraftType = getAircraftType(msg, text);
 
-  const callsign = getCallsign(msg).toUpperCase() || "UNKNWN";
+  const callsign = getCallsign(msg).toUpperCase() || extractCallsignFromText(text) || "UNKNWN";
   const branch = guessBranch(callsign);
   const missionType = guessMissionType(callsign, text);
 
@@ -93,22 +112,14 @@ export function parseINItoFlightPlan(msg) {
 // Parse a FTX message into a free-text message object
 export function parseFTXtoMessage(msg, flightPlanId) {
   const text = (msg.text || "").trim();
-  // Try the flight field first; if missing, grab the first token from the text
-  let callsign = getCallsign(msg).toUpperCase();
-  if (!callsign) {
-    // Extract first token and clean it of special characters
-    const firstToken = text.split(/\s+/)[0]?.toUpperCase();
-    // Match 3-12 alphanumeric characters (callsigns can have numbers mixed in)
-    if (firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken)) {
-      callsign = firstToken;
-    }
-  }
+  const callsign = getCallsign(msg).toUpperCase() || extractCallsignFromText(text) || "UNKNWN";
   return {
     id: `ftx-${msg.id}`,
-    callsign: callsign || "UNKNWN",
+    callsign,
     timestamp: msg.timestamp,
     rawText: `FTX/ID ${(msg.text || "").trim()}`,
     flightPlanId: flightPlanId || null,
+    aircraftType: getAircraftType(msg, text),
     _rawMsg: msg,
   };
 }
