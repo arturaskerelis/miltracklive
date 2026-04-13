@@ -67,6 +67,11 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
               MAP
             </Badge>
           )}
+          {flight && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">
+              INI
+            </Badge>
+          )}
           {flight && flight.departure && flight.destination && (
             <span className="font-mono text-[10px] text-muted-foreground/70">
               {flight.departure} → {flight.destination}
