@@ -67,11 +67,18 @@ export default function useAirframesData() {
         }
 
         const callsignToId = new Map(parsedFlights.map((f) => [f.callsign, f.id]));
-        // Deduplicate FTX messages by id
-        const seenMsgIds = new Set();
+        // Deduplicate FTX messages by content, since Airframes can return the same message from multiple stations
+        const seenFtxKeys = new Set();
         const uniqueFtxRaw = ftxRaw.filter((msg) => {
-          if (seenMsgIds.has(msg.id)) return false;
-          seenMsgIds.add(msg.id);
+          const callsignMatch = (msg.text || '').match(/FTX\/ID[^,]*,([^,\/]+),/i);
+          const messageKey = [
+            callsignMatch?.[1]?.trim().toUpperCase() || '',
+            (msg.text || '').trim().toUpperCase(),
+            msg.timestamp || ''
+          ].join('::');
+
+          if (seenFtxKeys.has(messageKey)) return false;
+          seenFtxKeys.add(messageKey);
           return true;
         });
         const parsedMessages = uniqueFtxRaw.map((msg) => {
