@@ -24,6 +24,7 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
 
   return (
     <button
+      data-flight-select="true"
       onClick={() => onSelect(flight.id)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

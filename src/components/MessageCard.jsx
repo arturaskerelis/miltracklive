@@ -49,6 +49,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
   return (
     <button
       id={`message-${message.id}`}
+      data-flight-select="true"
       onClick={() => onClick?.(message)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

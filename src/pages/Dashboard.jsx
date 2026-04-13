@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TopBar from "../components/TopBar";
 import FlightPlansPanel from "../components/FlightPlansPanel";
 import MapPanel from "../components/MapPanel";
@@ -11,6 +11,18 @@ export default function Dashboard() {
   const [timezone, setTimezone] = useState("UTC");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch, isLoading } = useAirframesData();
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      const interactiveFlightElement = event.target.closest('[data-flight-select="true"]');
+      if (!interactiveFlightElement) {
+        setSelectedFlight(null);
+      }
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+    return () => document.removeEventListener("click", handleDocumentClick);
+  }, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
