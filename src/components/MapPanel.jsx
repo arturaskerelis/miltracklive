@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import { Crosshair } from "lucide-react";
-import { getBranchColor } from "../lib/mockData";
 import { base44 } from "@/api/base44Client";
 import L from "leaflet";
 
@@ -105,6 +104,7 @@ const militaryBases = {
 
 export default function MapPanel({ flights, messages = [], selectedFlight, onSelectFlight }) {
   const [liveAircraft, setLiveAircraft] = useState([]);
+  const [hoveredFlight, setHoveredFlight] = useState(null);
 
   useEffect(() => {
     async function fetchMil() {
@@ -121,6 +121,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   }, []);
 
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
+  const filedFlights = flights.filter((f) => f.status === "filed" && militaryBases[f.departure]);
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
@@ -164,6 +165,25 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           );
         })}
 
+        {/* Hover route lines for filed flights */}
+        {filedFlights.map((flight) => {
+          const depCoords = militaryBases[flight.departure];
+          const destCoords = militaryBases[flight.destination];
+          if (!depCoords || !destCoords || hoveredFlight !== flight.id) return null;
+          return (
+            <Polyline
+              key={`filed-route-${flight.id}`}
+              positions={[depCoords, destCoords]}
+              pathOptions={{
+                color: getBranchHexColor(flight.branch),
+                weight: 3,
+                opacity: 0.9,
+                dashArray: "6 6",
+              }}
+            />
+          );
+        })}
+
         {/* ACARS-enriched flight markers */}
         {enRouteFlights.map((flight) => (
           <Marker
@@ -202,6 +222,47 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           </Marker>
         ))}
 
+        {/* Filed flight markers at departure airport */}
+        {filedFlights.map((flight) => {
+          const departureCoords = militaryBases[flight.departure];
+          if (!departureCoords) return null;
+          return (
+            <Marker
+              key={`filed-${flight.id}`}
+              position={departureCoords}
+              zIndexOffset={selectedFlight === flight.id ? 900 : 100}
+              icon={createAircraftIcon(
+                getBranchHexColor(flight.branch),
+                selectedFlight === flight.id || hoveredFlight === flight.id,
+                flight.callsign,
+                flight.aircraftType,
+                [{ label: 'INI', border: 'rgba(96,165,250,0.35)', text: '#93c5fd', background: 'rgba(59,130,246,0.12)' }],
+                flight.departure && flight.destination ? `${flight.departure} → ${flight.destination}` : ""
+              )}
+              eventHandlers={{
+                click: () => onSelectFlight(flight.id),
+                mouseover: () => setHoveredFlight(flight.id),
+                mouseout: () => setHoveredFlight((current) => current === flight.id ? null : current),
+              }}
+            >
+              <Popup className="military-popup">
+                <div className="min-w-48">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-mono font-bold text-sm">{flight.callsign}</span>
+                    <span className="text-xs text-gray-400">{flight.aircraftType}</span>
+                  </div>
+                  <div className="text-xs text-gray-400 space-y-0.5">
+                    <div>{flight.departure} → {flight.destination}</div>
+                    <div>Status: FILED</div>
+                    <div>Mission: {flight.missionCode}</div>
+                    <div>Branch: {flight.branch} | {flight.missionType}</div>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
         {/* Live adsb.lol military aircraft (grey markers) */}
         {extraAircraft.map((ac) => {
           const callsign = (ac.flight || ac.hex || 'MIL').trim();
@@ -239,7 +300,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            {enRouteFlights.length + extraAircraft.length} aircraft tracked
+            {enRouteFlights.length + filedFlights.length + extraAircraft.length} aircraft tracked
           </p>
         </div>
       </div>
