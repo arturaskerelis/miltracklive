@@ -68,8 +68,13 @@ export default function useAirframesData() {
 
         const callsignToId = new Map(parsedFlights.map((f) => [f.callsign, f.id]));
         const parsedMessages = ftxRaw.map((msg) => {
-          const callsign = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').toUpperCase();
-          return parseFTXtoMessage(msg, callsignToId.get(callsign) || null);
+          // Extract callsign from flight field or first token of text
+          let cs = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').trim().toUpperCase();
+          if (!cs) {
+            const firstToken = (msg.text || '').trim().split(/\s+/)[0];
+            if (firstToken && /^[A-Z0-9]{3,8}$/.test(firstToken)) cs = firstToken;
+          }
+          return parseFTXtoMessage(msg, callsignToId.get(cs) || null);
         });
 
         // Batch AI-decode the real ACARS messages

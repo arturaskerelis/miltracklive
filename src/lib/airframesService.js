@@ -92,9 +92,16 @@ export function parseINItoFlightPlan(msg) {
 
 // Parse a FTX message into a free-text message object
 export function parseFTXtoMessage(msg, flightPlanId) {
+  const text = (msg.text || "").trim();
+  // Try the flight field first; if missing, grab the first token from the text
+  let callsign = getCallsign(msg).toUpperCase();
+  if (!callsign) {
+    const firstToken = text.split(/\s+/)[0];
+    if (firstToken && /^[A-Z0-9]{3,8}$/.test(firstToken)) callsign = firstToken;
+  }
   return {
     id: `ftx-${msg.id}`,
-    callsign: getCallsign(msg).toUpperCase() || "UNKNWN",
+    callsign: callsign || "UNKNWN",
     timestamp: msg.timestamp,
     rawText: `FTX/ID ${(msg.text || "").trim()}`,
     flightPlanId: flightPlanId || null,

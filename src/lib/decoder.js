@@ -135,15 +135,15 @@ export function decodeMessage(rawText) {
     }
   }
 
-  // Fallback: expand abbreviations word by word, skip raw codes
+  // Fallback: expand abbreviations word by word, or return the raw text
   const words = cleaned.split(/\s+/);
   const expanded = words
     .map((w) => abbreviations[w.toUpperCase()] || null)
     .filter(Boolean)
     .join(", ");
-  return expanded
-    ? `Status update — ${expanded}.`
-    : "Aircraft status update. Awaiting full translation.";
+  if (expanded) return `Status update — ${expanded}.`;
+  // Return the raw message so users can see what was actually sent
+  return cleaned || "(empty message)";
 }
 
 export function getMessageCategory(rawText) {
