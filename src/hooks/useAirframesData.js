@@ -66,6 +66,9 @@ export default function useAirframesData() {
           parsedFlights.forEach((fp) => {
             const ac = adsbMap[fp.callsign];
             if (ac) {
+              const originalDeparture = fp.departure;
+              const originalDestination = fp.destination;
+
               if (ac.lat != null) fp.lat = ac.lat;
               if (ac.lon != null) fp.lng = ac.lon;
               if (ac.alt_baro != null) fp.altitude = ac.alt_baro;
@@ -73,8 +76,12 @@ export default function useAirframesData() {
               if (ac.track != null) fp.heading = Math.round(ac.track);
               if (ac.flight) fp.callsign = ac.flight.trim();
               if (ac.t) fp.aircraftType = ac.t;
-              if (ac.dep) fp.departure = ac.dep;
-              if (ac.dst) fp.destination = ac.dst;
+              if (ac.dep && /^[A-Z]{4}$/.test(ac.dep)) fp.departure = ac.dep;
+              if (ac.dst && /^[A-Z]{4}$/.test(ac.dst)) fp.destination = ac.dst;
+
+              if (!fp.departure || fp.departure === '????') fp.departure = originalDeparture;
+              if (!fp.destination || fp.destination === '????') fp.destination = originalDestination;
+
               fp.status = 'en-route';
             }
           });
