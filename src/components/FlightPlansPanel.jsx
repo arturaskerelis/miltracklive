@@ -1,19 +1,32 @@
-import { Plane, Clock, ArrowRight, CalendarDays } from "lucide-react";
+import { Plane, ArrowRight, CalendarDays } from "lucide-react";
+import { useState, useRef } from "react";
 import useNow from "../hooks/useNow";
 import { formatInTZ } from "../hooks/useZuluClock";
 import { relativeTime } from "../lib/relativeTime";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getStatusColor, getBranchColor } from "../lib/mockData";
-import moment from "moment";
 
 function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
   const statusClass = getStatusColor(flight.status);
   const branchClass = getBranchColor(flight.branch);
+  const [showRaw, setShowRaw] = useState(false);
+  const hoverTimer = useRef(null);
+
+  const handleMouseEnter = () => {
+    hoverTimer.current = setTimeout(() => setShowRaw(true), 500);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(hoverTimer.current);
+    setShowRaw(false);
+  };
 
   return (
     <button
       onClick={() => onSelect(flight.id)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`w-full text-left px-3 py-2.5 border-b border-border/50 transition-all hover:bg-muted/60 ${
         isSelected ? "bg-primary/10 border-l-2 border-l-primary" : ""
       }`}
@@ -56,6 +69,15 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
         </div>
         <span className="font-mono text-primary/70">{flight.missionCode}</span>
       </div>
+
+      {showRaw && flight.rawAcars && (
+        <div className="mt-2 flex items-start gap-2">
+          <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
+          <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
+            {flight.rawAcars.replace(/^INI\/ID\s*/i, '').replace(new RegExp(`^[^,]+,${flight.callsign}\\s*,?`, 'i'), '')}
+          </p>
+        </div>
+      )}
     </button>
   );
 }

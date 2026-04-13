@@ -8,6 +8,16 @@ const MILITARY_CALLSIGNS = [
   "GHOST", "NIGHT", "HOOK", "VIPER", "EAGLE", "RAVEN",
 ];
 
+function parseStructuredHeader(text = "", messageType = "FTX") {
+  const match = text.trim().match(new RegExp(`${messageType}\\/ID([^,\\/]+),([^,\\/]+),`, 'i'));
+  if (!match) return null;
+
+  return {
+    hex: match[1].trim().toUpperCase(),
+    callsign: match[2].trim().toUpperCase(),
+  };
+}
+
 function isMilitary(callsign) {
   if (!callsign) return false;
   const upper = callsign.toUpperCase();
@@ -27,20 +37,22 @@ function getCallsign(msg) {
   }
 
   const text = (msg.text || '').trim();
-  const structuredHeaderMatch = text.match(/FTX\/ID[^,]*,([^,\/]+),/i);
-  if (structuredHeaderMatch) {
-    return structuredHeaderMatch[1].trim();
-  }
+  const ftxHeader = parseStructuredHeader(text, 'FTX');
+  if (ftxHeader?.callsign) return ftxHeader.callsign;
+
+  const iniHeader = parseStructuredHeader(text, 'INI');
+  if (iniHeader?.callsign) return iniHeader.callsign;
 
   return '';
 }
 
 function getHex(msg) {
   const text = (msg.text || '').trim();
-  const structuredHeaderMatch = text.match(/FTX\/ID([^,\/]+),/i);
-  if (structuredHeaderMatch) {
-    return structuredHeaderMatch[1].trim().toUpperCase();
-  }
+  const ftxHeader = parseStructuredHeader(text, 'FTX');
+  if (ftxHeader?.hex) return ftxHeader.hex;
+
+  const iniHeader = parseStructuredHeader(text, 'INI');
+  if (iniHeader?.hex) return iniHeader.hex;
 
   if (typeof msg.airframe === 'object' && msg.airframe !== null) {
     return msg.airframe.hex || msg.airframe.icaoHex || msg.airframe.icao || '';
@@ -117,6 +129,7 @@ export function parseINItoFlightPlan(msg) {
   return {
     id: `ini-${msg.id}`,
     callsign,
+    hex: getHex(msg).toUpperCase() || "UNKNOWN",
     aircraftType,
     departure,
     destination,
