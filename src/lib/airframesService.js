@@ -16,10 +16,11 @@ function isMilitary(callsign) {
 
 // Extract callsign string from message (API returns nested flight object)
 function getCallsign(msg) {
-  if (typeof msg.flight === 'object' && msg.flight !== null) {
+  if (!msg || msg.flight == null) return '';
+  if (typeof msg.flight === 'object') {
     return msg.flight.flight || msg.flight.flightIcao || '';
   }
-  return msg.flight || '';
+  return String(msg.flight);
 }
 
 // Extract tail from message
