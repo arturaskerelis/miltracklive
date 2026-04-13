@@ -102,6 +102,7 @@ const militaryBases = airportCoordinates;
 export default function MapPanel({ flights, messages = [], selectedFlight, onSelectFlight }) {
   const [liveAircraft, setLiveAircraft] = useState([]);
   const [dynamicAirports, setDynamicAirports] = useState({});
+  const [failedAirportLookups, setFailedAirportLookups] = useState([]);
 
   useEffect(() => {
     async function fetchMil() {
@@ -121,26 +122,33 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
     async function fetchAirportCoordinates() {
       const missingCodes = [...new Set(
         flights.flatMap((flight) => [flight.departure, flight.destination])
-          .filter((code) => code && !airportCoordinates[code] && !dynamicAirports[code])
+          .filter((code) => code && !airportCoordinates[code] && !dynamicAirports[code] && !failedAirportLookups.includes(code))
       )];
 
       if (missingCodes.length === 0) return;
 
       try {
         const res = await base44.functions.invoke('airportLookup', { codes: missingCodes });
-        setDynamicAirports((current) => ({ ...current, ...(res.data?.airports || {}) }));
+        const resolvedAirports = res.data?.airports || {};
+        setDynamicAirports((current) => ({ ...current, ...resolvedAirports }));
+        setFailedAirportLookups((current) => [
+          ...new Set([
+            ...current,
+            ...missingCodes.filter((code) => !resolvedAirports[code]),
+          ]),
+        ]);
       } catch (e) {
+        setFailedAirportLookups((current) => [...new Set([...current, ...missingCodes])]);
         console.warn('airportLookup failed:', e.message);
       }
     }
 
     fetchAirportCoordinates();
-  }, [flights, dynamicAirports]);
+  }, [flights, dynamicAirports, failedAirportLookups]);
 
   const allAirports = useMemo(() => ({ ...airportCoordinates, ...dynamicAirports }), [dynamicAirports]);
 
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
-  const flightsWithKnownRoutes = flights.filter((f) => allAirports[f.departure] && allAirports[f.destination]);
   const filedFlights = flights.filter((f) => f.status === "filed" && allAirports[f.departure]);
   const selectedFlightData = flights.find((flight) => flight.id === selectedFlight) || null;
   const selectedRoutePositions = useMemo(() => {

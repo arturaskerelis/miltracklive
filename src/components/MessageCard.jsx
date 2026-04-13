@@ -1,16 +1,17 @@
 import { Sparkles, Clock } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import useNow from "../hooks/useNow";
 import { formatInTZ } from "../hooks/useZuluClock";
 import { relativeTime } from "../lib/relativeTime";
 import { Badge } from "@/components/ui/badge";
 import { decodeMessage, getMessageCategory } from "../lib/decoder";
-import moment from "moment";
 
 function extractCallsignFromRawText(rawText = "") {
-  const cleaned = rawText.replace(/^FTX\/ID\s*/i, '').trim().toUpperCase();
-  const structuredHeaderMatch = cleaned.match(/FTX\/ID[^,]*,([^,\/]+),/i);
+  const normalized = rawText.trim().toUpperCase();
+  const structuredHeaderMatch = normalized.match(/FTX\/ID[^,]*,([^,\/]+),/i);
   if (structuredHeaderMatch) return structuredHeaderMatch[1].trim();
+
+  const cleaned = normalized.replace(/^FTX\/ID\s*/i, '').trim();
 
   const tokens = cleaned
     .split(/\s+/)
@@ -40,6 +41,10 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
     clearTimeout(hoverTimer.current);
     setShowRaw(false);
   };
+
+  useEffect(() => {
+    return () => clearTimeout(hoverTimer.current);
+  }, []);
 
   return (
     <button
@@ -94,7 +99,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
         <div className="mt-2 flex items-start gap-2">
           <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
           <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
-            {message.rawText.replace(/^FTX\/ID\s*/i, '')}
+            {message.rawText}
           </p>
         </div>
       )}
