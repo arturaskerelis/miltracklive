@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Radar, Sun, Moon, Plane, Radio, Map, Filter } from "lucide-react";
+import { Radar, Sun, Moon, Plane, Radio, Map, Filter, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,6 +29,8 @@ export default function TopBar({
   isLive,
   error,
   countdown,
+  onRefresh,
+  isRefreshing,
 }) {
   const [dark, setDark] = useState(true);
 
@@ -126,6 +128,15 @@ export default function TopBar({
           )}
         </div>
 
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={onRefresh}
+          title="Refresh data"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </Button>
         <Button
           variant="ghost"
           size="icon"

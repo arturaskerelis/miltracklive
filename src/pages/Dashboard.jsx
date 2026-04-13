@@ -11,7 +11,14 @@ export default function Dashboard() {
   const [branchFilter, setBranchFilter] = useState("all");
   const [missionFilter, setMissionFilter] = useState("all");
   const [selectedFlight, setSelectedFlight] = useState(null);
-  const { flights: allFlights, messages: allMessages, isLive, error, countdown } = useAirframesData();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch } = useAirframesData();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  };
 
   const filteredFlights = useMemo(() => {
     return allFlights.filter((f) => {
@@ -48,6 +55,8 @@ export default function Dashboard() {
         isLive={isLive}
         error={error}
         countdown={countdown}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
