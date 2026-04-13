@@ -93,15 +93,10 @@ export default function useAirframesData() {
         // Deduplicate FTX messages by content, since Airframes can return the same message from multiple stations
         const seenFtxKeys = new Set();
         const uniqueFtxRaw = ftxRaw.filter((msg) => {
-          const callsignMatch = (msg.text || '').match(/FTX\/ID[^,]*,([^,\/]+),/i);
-          const messageKey = [
-            callsignMatch?.[1]?.trim().toUpperCase() || '',
-            (msg.text || '').trim().toUpperCase(),
-            msg.timestamp || ''
-          ].join('::');
+          const normalizedText = `FTX/ID ${(msg.text || '').trim()}`.replace(/\s+/g, ' ').trim().toUpperCase();
 
-          if (seenFtxKeys.has(messageKey)) return false;
-          seenFtxKeys.add(messageKey);
+          if (!normalizedText || seenFtxKeys.has(normalizedText)) return false;
+          seenFtxKeys.add(normalizedText);
           return true;
         });
         const parsedMessages = uniqueFtxRaw.map((msg) => {
