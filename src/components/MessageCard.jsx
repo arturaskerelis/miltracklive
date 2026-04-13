@@ -48,7 +48,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono font-semibold text-sm text-foreground">
             {displayCallsign}
@@ -70,7 +70,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
             {category.label}
           </Badge>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 flex-wrap justify-end">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground flex-wrap">
           <Clock className="w-3 h-3" />
           <span>{formatInTZ(message.timestamp, timezone, "DD MMM HH:mm:ss")}</span>
           {relativeTime(message.timestamp, now) && (
