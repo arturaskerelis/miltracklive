@@ -1,9 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const AIRFRAMES_URLS = {
-  FTX: "https://app.airframes.io/messages/historical?text=ftx/id&timeframe=last-week&exclude_labels=_d,Q0&exclude_errors=3&action=execute",
-  INI: "https://app.airframes.io/messages/historical?text=ini/id&timeframe=last-week&exclude_labels=_d,Q0&exclude_errors=3&action=execute",
-};
+const AIRFRAMES_BASE = "https://api.airframes.io";
 
 Deno.serve(async (req) => {
   try {
@@ -15,12 +12,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Invalid type. Must be FTX or INI." }, { status: 400 });
     }
 
-    const url = AIRFRAMES_URLS[type];
+    const textSearch = type === "FTX" ? "ftx/id" : "ini/id";
+    const url = `${AIRFRAMES_BASE}/messages?text=${encodeURIComponent(textSearch)}&timeframe=last-week&exclude_errors=3&exclude_labels=_d,Q0&limit=100`;
 
+    const apiKey = Deno.env.get("AIRFRAMES_API_KEY");
     const headers = {
       "Accept": "application/json",
       "User-Agent": "MilTrackLive/1.0",
     };
+    if (apiKey) headers["X-Api-Key"] = apiKey;
 
     const response = await fetch(url, { headers });
 
