@@ -4,7 +4,6 @@ import FlightPlansPanel from "../components/FlightPlansPanel";
 import MapPanel from "../components/MapPanel";
 import FreeTextFeed from "../components/FreeTextFeed";
 import LiveDataLoadingPlaceholder from "../components/LiveDataLoadingPlaceholder";
-import SiteFeedbackAgentCard from "../components/SiteFeedbackAgentCard";
 import useAirframesData from "../hooks/useAirframesData";
 
 export default function Dashboard() {
@@ -107,22 +106,17 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-card/60 px-4 py-3">
-        <div className="mb-3 max-w-sm">
-          <SiteFeedbackAgentCard />
-        </div>
-        <footer className="text-[11px] text-muted-foreground">
-          Data from 
-          <a href="https://airframes.io" target="_blank" rel="noreferrer" className="text-primary hover:underline">
-            airframes.io
-          </a>
-          {" "}and{" "}
-          <a href="https://adsb.lol" target="_blank" rel="noreferrer" className="text-primary hover:underline">
-            adsb.lol
-          </a>
-          .
-        </footer>
-      </div>
+      <footer className="shrink-0 border-t border-border bg-card/60 px-4 py-2 text-[11px] text-muted-foreground">
+        Data from 
+        <a href="https://airframes.io" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          airframes.io
+        </a>
+        {" "}and{" "}
+        <a href="https://adsb.lol" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          adsb.lol
+        </a>
+        .
+      </footer>
     </div>
   );
 }
