@@ -13,50 +13,54 @@ L.Icon.Default.mergeOptions({
 });
 
 function createAircraftIcon(color, isSelected, callsign = "", aircraftType = "", flags = [], routeLabel = "") {
-  const size = isSelected ? 28 : 22;
-  const longestLabel = Math.max(callsign.length, aircraftType.length, routeLabel.length);
-  const labelWidth = Math.max(130, Math.min(220, longestLabel * 8));
-  const flagsHtml = flags.length
-    ? `<div style="display:flex; gap:4px; margin-top:4px; flex-wrap:wrap;">${flags.map((flag) => `<span style="font-size:9px; line-height:1; padding:3px 5px; border-radius:999px; border:1px solid ${flag.border}; color:${flag.text}; background:${flag.background}; font-weight:700; letter-spacing:0.04em;">${flag.label}</span>`).join('')}</div>`
+  const size = isSelected ? 26 : 18;
+  const showDetails = isSelected;
+  const labelWidth = showDetails ? 160 : Math.max(74, Math.min(110, Math.max(3, callsign.length) * 7));
+  const compactFlags = flags.slice(0, showDetails ? 3 : 1);
+  const flagsHtml = compactFlags.length
+    ? `<div style="display:flex; gap:4px; margin-top:4px; flex-wrap:wrap;">${compactFlags.map((flag) => `<span style="font-size:9px; line-height:1; padding:2px 5px; border-radius:999px; border:1px solid ${flag.border}; color:${flag.text}; background:${flag.background}; font-weight:700; letter-spacing:0.04em;">${flag.label}</span>`).join('')}</div>`
     : "";
-  const routeHtml = routeLabel
-    ? `<div style="font-size:10px; line-height:1.1; color: rgba(255,255,255,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px;">${routeLabel}</div>`
+  const routeHtml = showDetails && routeLabel
+    ? `<div style="font-size:10px; line-height:1.1; color: rgba(255,255,255,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px;">${routeLabel}</div>`
+    : "";
+  const typeHtml = showDetails && aircraftType
+    ? `<div style="font-size:10px; line-height:1.1; color: rgba(255,255,255,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">${aircraftType}</div>`
     : "";
 
   return L.divIcon({
     className: "aircraft-icon",
-    html: `<div style="display:flex; align-items:center; gap:8px;">
+    html: `<div style="display:flex; align-items:center; gap:${showDetails ? 8 : 6}px;">
       <div style="
         width: ${size}px; height: ${size}px;
         display: flex; align-items: center; justify-content: center;
         background: ${color}; border-radius: 50%;
-        border: 2px solid ${isSelected ? '#fff' : 'rgba(255,255,255,0.3)'};
-        box-shadow: 0 0 ${isSelected ? '12' : '6'}px ${color}80;
+        border: 2px solid ${isSelected ? '#fff' : 'rgba(255,255,255,0.22)'};
+        box-shadow: 0 0 ${isSelected ? '12' : '5'}px ${color}66;
         transition: all 0.3s;
         flex-shrink: 0;
       ">
-        <svg width="${size - 8}" height="${size - 8}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <svg width="${size - 7}" height="${size - 7}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
           <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.4-.1.9.3 1.1l5.2 3 L6 14.3l-2.5-.3c-.4-.1-.8.1-1 .4L2 15l3.5 1.5L7 20l.5-.5c.3-.2.5-.6.4-1L7.6 16l3-2.9 3 5.2c.2.4.7.5 1.1.3l.5-.3c.4-.2.6-.6.5-1.1z"/>
         </svg>
       </div>
       <div style="
         min-width: ${labelWidth}px;
         max-width: ${labelWidth}px;
-        padding: 4px 8px;
-        border-radius: 10px;
-        background: rgba(15, 23, 42, 0.82);
-        border: 1px solid rgba(255,255,255,0.14);
-        box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+        padding: ${showDetails ? '5px 8px' : '3px 6px'};
+        border-radius: ${showDetails ? '10px' : '999px'};
+        background: rgba(15, 23, 42, ${showDetails ? '0.82' : '0.74'});
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.22);
         color: white;
         backdrop-filter: blur(6px);
       ">
-        <div style="font-size: 11px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${callsign || 'MIL'}</div>
-        <div style="font-size: 10px; line-height: 1.1; color: rgba(255,255,255,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">${aircraftType || 'Unknown'}</div>
+        <div style="font-size: ${showDetails ? '11px' : '10px'}; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${callsign || 'MIL'}</div>
+        ${typeHtml}
         ${routeHtml}
         ${flagsHtml}
       </div>
     </div>`,
-    iconSize: [size + labelWidth + 8, size],
+    iconSize: [size + labelWidth + (showDetails ? 8 : 6), size],
     iconAnchor: [size / 2, size / 2],
   });
 }
