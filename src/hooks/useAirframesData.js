@@ -142,9 +142,15 @@ export default function useAirframesData() {
   }, []);
 
   useEffect(() => {
-    const initialRefresh = setTimeout(() => {
+    const triggerInitialRefresh = () => {
       fetchAll();
-    }, 0);
+    };
+
+    if (document.readyState === "complete") {
+      triggerInitialRefresh();
+    } else {
+      window.addEventListener("load", triggerInitialRefresh, { once: true });
+    }
 
     // Poll every 6 minutes
     timerRef.current = setInterval(fetchAll, POLL_INTERVAL * 1000);
@@ -156,7 +162,7 @@ export default function useAirframesData() {
     }, 1000);
 
     return () => {
-      clearTimeout(initialRefresh);
+      window.removeEventListener("load", triggerInitialRefresh);
       clearInterval(timerRef.current);
       clearInterval(tickRef.current);
     };
