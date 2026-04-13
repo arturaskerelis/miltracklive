@@ -29,7 +29,7 @@ export default function FreeTextFeed({ messages, flights = [], selectedFlight, o
         <div>
           <div className="flex items-center gap-1.5">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-foreground">
-              Free Text — Plain English
+              Free Text — Simplified
             </h2>
             <Sparkles className="w-3 h-3 text-primary" />
           </div>
