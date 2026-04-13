@@ -99,7 +99,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
         <div className="mt-2 flex items-start gap-2">
           <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
           <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
-            {message.rawText}
+            {message.rawText.slice(0, -4)}
           </p>
         </div>
       )}
