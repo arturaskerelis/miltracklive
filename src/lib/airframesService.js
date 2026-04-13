@@ -27,9 +27,9 @@ function getCallsign(msg) {
   }
 
   const text = (msg.text || '').trim();
-  const structuredHeaderMatch = text.match(/FTX\/ID([A-Z0-9]+),([A-Z0-9]{3,12}),([^\/]+)\/([A-Z0-9]+),\//i);
+  const structuredHeaderMatch = text.match(/FTX\/ID[^,]*,([^,\/]+),/i);
   if (structuredHeaderMatch) {
-    return structuredHeaderMatch[2];
+    return structuredHeaderMatch[1].trim();
   }
 
   return '';
