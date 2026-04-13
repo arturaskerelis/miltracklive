@@ -142,7 +142,30 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
   const flightsWithKnownRoutes = flights.filter((f) => allAirports[f.departure] && allAirports[f.destination]);
   const filedFlights = flights.filter((f) => f.status === "filed" && allAirports[f.departure]);
-  const selectedKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === selectedFlight);
+  const selectedFlightData = flights.find((flight) => flight.id === selectedFlight) || null;
+  const selectedRoutePositions = useMemo(() => {
+    if (!selectedFlightData) return null;
+
+    const departureCoords = allAirports[selectedFlightData.departure];
+    const destinationCoords = allAirports[selectedFlightData.destination];
+    const hasLivePosition = selectedFlightData.lat && selectedFlightData.lng;
+
+    if (departureCoords && destinationCoords) {
+      return hasLivePosition
+        ? [departureCoords, [selectedFlightData.lat, selectedFlightData.lng], destinationCoords]
+        : [departureCoords, destinationCoords];
+    }
+
+    if (hasLivePosition && departureCoords) {
+      return [departureCoords, [selectedFlightData.lat, selectedFlightData.lng]];
+    }
+
+    if (hasLivePosition && destinationCoords) {
+      return [[selectedFlightData.lat, selectedFlightData.lng], destinationCoords];
+    }
+
+    return null;
+  }, [selectedFlightData, allAirports]);
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
@@ -291,21 +314,12 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         })}
 
         {/* Active route lines rendered last so they stay visible */}
-        {selectedKnownRouteFlight && (
+        {selectedFlightData && selectedRoutePositions && (
           <Polyline
-            key={`selected-route-${selectedKnownRouteFlight.id}`}
-            positions={selectedKnownRouteFlight.lat && selectedKnownRouteFlight.lng
-              ? [
-                  allAirports[selectedKnownRouteFlight.departure],
-                  [selectedKnownRouteFlight.lat, selectedKnownRouteFlight.lng],
-                  allAirports[selectedKnownRouteFlight.destination],
-                ]
-              : [
-                  allAirports[selectedKnownRouteFlight.departure],
-                  allAirports[selectedKnownRouteFlight.destination],
-                ]}
+            key={`selected-route-${selectedFlightData.id}`}
+            positions={selectedRoutePositions}
             pathOptions={{
-              color: getBranchHexColor(selectedKnownRouteFlight.branch),
+              color: getBranchHexColor(selectedFlightData.branch),
               weight: 5,
               opacity: 1,
               dashArray: "6 6",
