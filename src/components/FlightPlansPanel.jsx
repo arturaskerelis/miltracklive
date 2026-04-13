@@ -32,9 +32,14 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
       }`}
     >
       <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Plane className="w-3.5 h-3.5 text-primary shrink-0" />
           <span className="font-mono font-semibold text-sm">{flight.callsign}</span>
+          {flight.lat && flight.lng && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-cyan-500/30 text-cyan-400">
+              MAP
+            </Badge>
+          )}
           <span className={`text-[10px] font-medium ${branchClass}`}>{flight.branch}</span>
         </div>
         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${statusClass}`}>

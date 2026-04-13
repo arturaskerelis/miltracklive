@@ -53,6 +53,11 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
           <span className="font-mono font-semibold text-sm text-foreground">
             {displayCallsign}
           </span>
+          {flight?.lat && flight?.lng && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-cyan-500/30 text-cyan-400">
+              MAP
+            </Badge>
+          )}
           {flight && flight.departure && flight.destination && (
             <span className="font-mono text-[10px] text-muted-foreground/70">
               {flight.departure} → {flight.destination}
