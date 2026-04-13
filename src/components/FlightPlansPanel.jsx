@@ -40,6 +40,11 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
               MAP
             </Badge>
           )}
+          {flight.hasAcars && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/30 text-amber-400">
+              ACARS
+            </Badge>
+          )}
           <span className={`text-[10px] font-medium ${branchClass}`}>{flight.branch}</span>
         </div>
         <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${statusClass}`}>
@@ -87,8 +92,9 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
   );
 }
 
-export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlight, timezone = "UTC" }) {
+export default function FlightPlansPanel({ flights, messages = [], selectedFlight, onSelectFlight, timezone = "UTC" }) {
   const now = useNow();
+  const flightsWithAcars = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
   const sorted = [...flights].sort((a, b) => new Date(b.etd) - new Date(a.etd));
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
@@ -110,7 +116,7 @@ export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlig
         {sorted.map((flight) => (
           <FlightRow
             key={flight.id}
-            flight={flight}
+            flight={{ ...flight, hasAcars: flightsWithAcars.has(flight.id) }}
             isSelected={selectedFlight === flight.id}
             onSelect={onSelectFlight}
             now={now}

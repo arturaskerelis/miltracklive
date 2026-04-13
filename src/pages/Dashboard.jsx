@@ -59,6 +59,7 @@ export default function Dashboard() {
           <div className="col-span-3 overflow-hidden">
             <FlightPlansPanel
               flights={filteredFlights}
+              messages={filteredMessages}
               selectedFlight={selectedFlight}
               onSelectFlight={handleSelectFlight}
               timezone={timezone}
