@@ -44,9 +44,20 @@ export default function TopBar({
           <Radar className="w-6 h-6 text-primary" />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full animate-pulse-glow" />
         </div>
-        <span className="font-semibold text-base tracking-tight">
-          MilTrack <span className="text-primary">Live</span>
-        </span>
+        <div className="flex flex-col leading-tight">
+          <span className="font-semibold text-base tracking-tight">
+            MilTrack <span className="text-primary">Live</span>
+            <span className="ml-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Beta</span>
+          </span>
+          <a
+            href="https://twitter.com/2tswfl"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[10px] text-muted-foreground hover:text-primary transition-colors"
+          >
+            built by @2tswfl
+          </a>
+        </div>
       </div>
 
       {/* Live Clock */}

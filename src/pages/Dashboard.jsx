@@ -60,35 +60,21 @@ export default function Dashboard() {
       <div className="flex-1 overflow-hidden">
         {/* Desktop layout (hidden on mobile) */}
         <div className="grid grid-cols-12 h-full">
-          <div className="col-span-3 overflow-hidden">
-            <FlightPlansPanel
-              flights={filteredFlights}
-              messages={filteredMessages}
-              selectedFlight={selectedFlight}
-              onSelectFlight={handleSelectFlight}
-              timezone={timezone}
-            />
-          </div>
-          <div className="col-span-5 overflow-hidden border-x border-border">
-            <MapPanel
-              flights={filteredFlights}
-              messages={filteredMessages}
-              selectedFlight={selectedFlight}
-              onSelectFlight={handleSelectFlight}
-            />
-          </div>
-          <div className="col-span-4 overflow-hidden">
-            <FreeTextFeed
-              messages={filteredMessages}
-              flights={filteredFlights}
-              selectedFlight={selectedFlight}
-              onMessageClick={handleMessageClick}
-              timezone={timezone}
-            />
-          </div>
+...
         </div>
-
       </div>
+
+      <footer className="shrink-0 border-t border-border bg-card/60 px-4 py-2 text-[11px] text-muted-foreground">
+        Data from 
+        <a href="https://airframes.io" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          airframes.io
+        </a>
+        {" "}and{" "}
+        <a href="https://adsb.lol" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          adsb.lol
+        </a>
+        .
+      </footer>
     </div>
   );
 }

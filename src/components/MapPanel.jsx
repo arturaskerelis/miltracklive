@@ -190,6 +190,9 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         zoom={3}
         className="h-full w-full"
         zoomControl={false}
+        maxBounds={[[-85, -180], [85, 180]]}
+        maxBoundsViscosity={1.0}
+        worldCopyJump={true}
         style={{ background: "hsl(222, 28%, 7%)" }}
       >
         <TileLayer
