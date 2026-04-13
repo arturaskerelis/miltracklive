@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [timezone, setTimezone] = useState("UTC");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch } = useAirframesData();
+  const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch, isLoading } = useAirframesData();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -42,6 +42,13 @@ export default function Dashboard() {
         timezone={timezone}
         onTimezoneChange={setTimezone}
       />
+
+      {isLoading && allFlights.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-background/80 backdrop-blur-sm">
+          <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin mb-3" />
+          <p className="text-xs text-muted-foreground font-mono">Fetching live data…</p>
+        </div>
+      )}
 
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
       <div className="flex-1 overflow-hidden">

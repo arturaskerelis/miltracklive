@@ -12,8 +12,9 @@ import { flightPlans as mockFlights, freeTextMessages as mockMessages } from "..
 const POLL_INTERVAL = 6 * 60; // 6 minutes in seconds (2 calls × 250 = 500/day)
 
 export default function useAirframesData() {
-  const [flights, setFlights] = useState(mockFlights);
-  const [messages, setMessages] = useState(mockMessages);
+  const [flights, setFlights] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
   const [error, setError] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(null);
@@ -23,6 +24,7 @@ export default function useAirframesData() {
   const tickRef = useRef(null);
 
   const fetchAll = useCallback(async () => {
+    setIsLoading(true);
     try {
       const [iniRaw, ftxRaw] = await Promise.all([fetchINIMessages(), fetchFTXMessages()]);
 
@@ -93,10 +95,13 @@ export default function useAirframesData() {
       }
       setLastRefresh(new Date().toISOString());
     } catch (err) {
-      console.warn("Airframes fetch failed, using mock data:", err.message);
-      setError("Live feed unavailable — showing demo data");
+      console.warn("Airframes fetch failed:", err.message);
+      setError("Live feed unavailable");
+      setFlights(mockFlights);
+      setMessages(mockMessages);
       setIsLive(false);
     }
+    setIsLoading(false);
     // Reset countdown
     countdownRef.current = POLL_INTERVAL;
     setCountdown(POLL_INTERVAL);
@@ -120,5 +125,5 @@ export default function useAirframesData() {
     };
   }, [fetchAll]);
 
-  return { flights, messages, isLive, error, lastRefresh, countdown, refetch: fetchAll };
+  return { flights, messages, isLive, error, lastRefresh, countdown, refetch: fetchAll, isLoading };
 }
