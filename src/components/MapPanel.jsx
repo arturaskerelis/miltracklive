@@ -84,20 +84,22 @@ function toLatLng(lat, lng) {
   return [Number(lat), Number(lng)];
 }
 
-function FlyToSelected({ flights, selectedFlight }) {
+function FlyToSelected({ flights, selectedFlight, airports }) {
   const map = useMap();
   useEffect(() => {
     if (!selectedFlight) return;
 
     const flight = flights.find((f) => f.id === selectedFlight);
-    const target = flight && hasValidCoords(flight.lat, flight.lng)
-      ? toLatLng(flight.lat, flight.lng)
-      : null;
+    if (!flight) return;
 
-    if (!target || target.some((value) => !Number.isFinite(value))) return;
+    const target = hasValidCoords(flight.lat, flight.lng)
+      ? toLatLng(flight.lat, flight.lng)
+      : airports[flight.departure] || null;
+
+    if (!target || target.some((value) => !Number.isFinite(Number(value)))) return;
 
     map.flyTo(target, 5, { duration: 1 });
-  }, [selectedFlight, flights, map]);
+  }, [selectedFlight, flights, airports, map]);
   return null;
 }
 
@@ -211,7 +213,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
-        <FlyToSelected flights={flights} selectedFlight={selectedFlight} />
+        <FlyToSelected flights={flights} selectedFlight={selectedFlight} airports={allAirports} />
         <ClearSelectionOnMapClick onClearSelection={() => onSelectFlight(null)} />
 
         {/* ACARS-enriched flight markers */}
