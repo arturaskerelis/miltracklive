@@ -27,7 +27,7 @@ function getCallsign(msg) {
   }
 
   const text = (msg.text || '').trim();
-  const structuredHeaderMatch = text.match(/^([A-Z0-9]+),([A-Z0-9]{3,12}),(\d{12})\/([A-Z0-9]+),\//i);
+  const structuredHeaderMatch = text.match(/(?:^|FTX\/ID)([A-Z0-9]+),([A-Z0-9]{3,12}),(\d{12})\/([A-Z0-9]+),\//i);
   if (structuredHeaderMatch) {
     return structuredHeaderMatch[2];
   }
@@ -37,9 +37,9 @@ function getCallsign(msg) {
 
 function getHex(msg) {
   if (typeof msg.airframe === 'object' && msg.airframe !== null) {
-    return msg.airframe.hex || msg.airframe.icaoHex || '';
+    return msg.airframe.hex || msg.airframe.icaoHex || msg.airframe.icao || '';
   }
-  return msg.hex || msg.icaoHex || '';
+  return msg.hex || msg.icaoHex || msg.icao || msg.toHex || msg.fromHex || '';
 }
 
 function extractCallsignFromText(text) {
