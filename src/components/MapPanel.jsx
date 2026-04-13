@@ -13,23 +13,41 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-function createAircraftIcon(color, isSelected) {
+function createAircraftIcon(color, isSelected, callsign = "", aircraftType = "") {
   const size = isSelected ? 28 : 22;
+  const labelWidth = Math.max(110, Math.min(180, Math.max(callsign.length, aircraftType.length) * 8));
   return L.divIcon({
     className: "aircraft-icon",
-    html: `<div style="
-      width: ${size}px; height: ${size}px;
-      display: flex; align-items: center; justify-content: center;
-      background: ${color}; border-radius: 50%;
-      border: 2px solid ${isSelected ? '#fff' : 'rgba(255,255,255,0.3)'};
-      box-shadow: 0 0 ${isSelected ? '12' : '6'}px ${color}80;
-      transition: all 0.3s;
-    ">
-      <svg width="${size - 8}" height="${size - 8}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.4-.1.9.3 1.1l5.2 3 L6 14.3l-2.5-.3c-.4-.1-.8.1-1 .4L2 15l3.5 1.5L7 20l.5-.5c.3-.2.5-.6.4-1L7.6 16l3-2.9 3 5.2c.2.4.7.5 1.1.3l.5-.3c.4-.2.6-.6.5-1.1z"/>
-      </svg>
+    html: `<div style="display:flex; align-items:center; gap:8px;">
+      <div style="
+        width: ${size}px; height: ${size}px;
+        display: flex; align-items: center; justify-content: center;
+        background: ${color}; border-radius: 50%;
+        border: 2px solid ${isSelected ? '#fff' : 'rgba(255,255,255,0.3)'};
+        box-shadow: 0 0 ${isSelected ? '12' : '6'}px ${color}80;
+        transition: all 0.3s;
+        flex-shrink: 0;
+      ">
+        <svg width="${size - 8}" height="${size - 8}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+          <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.4-.1.9.3 1.1l5.2 3 L6 14.3l-2.5-.3c-.4-.1-.8.1-1 .4L2 15l3.5 1.5L7 20l.5-.5c.3-.2.5-.6.4-1L7.6 16l3-2.9 3 5.2c.2.4.7.5 1.1.3l.5-.3c.4-.2.6-.6.5-1.1z"/>
+        </svg>
+      </div>
+      <div style="
+        min-width: ${labelWidth}px;
+        max-width: ${labelWidth}px;
+        padding: 4px 8px;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.82);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+        color: white;
+        backdrop-filter: blur(6px);
+      ">
+        <div style="font-size: 11px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${callsign || 'MIL'}</div>
+        <div style="font-size: 10px; line-height: 1.1; color: rgba(255,255,255,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">${aircraftType || 'Unknown'}</div>
+      </div>
     </div>`,
-    iconSize: [size, size],
+    iconSize: [size + labelWidth + 8, size],
     iconAnchor: [size / 2, size / 2],
   });
 }
@@ -141,7 +159,12 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
             key={flight.id}
             position={[flight.lat, flight.lng]}
             zIndexOffset={selectedFlight === flight.id ? 1000 : 0}
-            icon={createAircraftIcon(getBranchHexColor(flight.branch), selectedFlight === flight.id)}
+            icon={createAircraftIcon(
+              getBranchHexColor(flight.branch),
+              selectedFlight === flight.id,
+              flight.callsign,
+              flight.aircraftType
+            )}
             eventHandlers={{ click: () => onSelectFlight(flight.id) }}
           >
             <Popup className="military-popup">
@@ -168,7 +191,7 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
             <Marker
               key={ac.hex || callsign}
               position={[ac.lat, ac.lon]}
-              icon={createAircraftIcon('#94a3b8', false)}
+              icon={createAircraftIcon('#94a3b8', false, callsign, ac.t)}
             >
               <Popup>
                 <div className="min-w-40">
