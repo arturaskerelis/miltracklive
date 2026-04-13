@@ -9,6 +9,9 @@ import moment from "moment";
 
 function extractCallsignFromRawText(rawText = "") {
   const cleaned = rawText.replace(/^FTX\/ID\s*/i, '').trim().toUpperCase();
+  const structuredHeaderMatch = cleaned.match(/^(\d+),([A-Z0-9]{3,12}),(\d{12})\/([A-Z0-9]+),\//);
+  if (structuredHeaderMatch) return structuredHeaderMatch[2];
+
   const tokens = cleaned
     .split(/\s+/)
     .map((token) => token.replace(/[^A-Z0-9]/g, ''))
