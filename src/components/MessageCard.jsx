@@ -1,5 +1,4 @@
 import { Sparkles, Clock } from "lucide-react";
-import { useState, useRef } from "react";
 import useNow from "../hooks/useNow";
 import { formatInTZ } from "../hooks/useZuluClock";
 import { relativeTime } from "../lib/relativeTime";
@@ -24,16 +23,6 @@ function extractCallsignFromRawText(rawText = "") {
 
 export default function MessageCard({ message, flight, isHighlighted, onClick, timezone = "UTC" }) {
   const now = useNow();
-  const [showRaw, setShowRaw] = useState(false);
-  const hoverTimer = useRef(null);
-
-  const handleMouseEnter = () => {
-    hoverTimer.current = setTimeout(() => setShowRaw(true), 500);
-  };
-  const handleMouseLeave = () => {
-    clearTimeout(hoverTimer.current);
-    setShowRaw(false);
-  };
   const decoded = message.decoded || decodeMessage(message.rawText);
   const category = getMessageCategory(message.rawText);
   const displayCallsign = message.callsign && message.callsign !== "UNKNWN"
@@ -80,23 +69,11 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
         </div>
       </div>
 
-      {/* Decoded / Raw toggle */}
-      <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        {showRaw ? (
-          <div className="flex items-start gap-2">
-            <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
-            <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
-              {message.rawText.replace(/^FTX\/ID\s*/i, '').replace(new RegExp(`^${displayCallsign}\\s*`, 'i'), '')}
-            </p>
-          </div>
-        ) : (
-          <div className="flex items-start gap-2">
-            <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-            <p className="text-sm leading-relaxed text-foreground/90">
-              {decoded}
-            </p>
-          </div>
-        )}
+      <div className="flex items-start gap-2">
+        <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-sm leading-relaxed text-foreground/90">
+          {decoded}
+        </p>
       </div>
     </button>
   );
