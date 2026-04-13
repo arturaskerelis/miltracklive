@@ -112,11 +112,13 @@ export function parseINItoFlightPlan(msg) {
   let departure = "????";
   let destination = "????";
   const routeBeforeFinalSlash = text.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\//i);
+  const routePair = text.match(/(?:^|\/|,)([A-Z]{4}),([A-Z]{4})(?=\/|,|$)/i);
   const routeSlash = text.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
   const routeDot = text.match(/([A-Z]{4})[/.]([A-Z]{4})/);
   const depDest = text.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
   const orgDest = text.match(/ORG[/\s]*([A-Z]{4}).*?DST[/\s]*([A-Z]{4})/i);
   if (routeBeforeFinalSlash) { departure = routeBeforeFinalSlash[2]; destination = routeBeforeFinalSlash[3]; }
+  else if (routePair) { departure = routePair[1]; destination = routePair[2]; }
   else if (routeSlash) { departure = routeSlash[1]; destination = routeSlash[2]; }
   else if (depDest) { departure = depDest[1]; destination = depDest[2]; }
   else if (orgDest) { departure = orgDest[1]; destination = orgDest[2]; }
