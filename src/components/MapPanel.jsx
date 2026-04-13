@@ -169,14 +169,15 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         {filedFlights.map((flight) => {
           const depCoords = militaryBases[flight.departure];
           const destCoords = militaryBases[flight.destination];
-          if (!depCoords || !destCoords || hoveredFlight !== flight.id) return null;
+          const isActive = hoveredFlight === flight.id || selectedFlight === flight.id;
+          if (!depCoords || !destCoords || !isActive) return null;
           return (
             <Polyline
               key={`filed-route-${flight.id}`}
               positions={[depCoords, destCoords]}
               pathOptions={{
                 color: getBranchHexColor(flight.branch),
-                weight: 3,
+                weight: selectedFlight === flight.id ? 4 : 3,
                 opacity: 0.9,
                 dashArray: "6 6",
               }}
