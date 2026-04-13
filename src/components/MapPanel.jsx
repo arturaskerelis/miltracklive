@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import { Crosshair } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { getStatusColor, getBranchColor } from "../lib/mockData";
-import moment from "moment";
+import { getBranchColor } from "../lib/mockData";
+import { base44 } from "@/api/base44Client";
 import L from "leaflet";
 
 // Fix default marker icon
@@ -14,7 +13,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// Custom aircraft icon
 function createAircraftIcon(color, isSelected) {
   const size = isSelected ? 28 : 22;
   return L.divIcon({
@@ -78,9 +76,30 @@ const militaryBases = {
 };
 
 export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
-  const enRouteFlights = flights.filter(
-    (f) => f.status === "en-route" && f.lat && f.lng
-  );
+  const [liveAircraft, setLiveAircraft] = useState([]);
+
+  useEffect(() => {
+    async function fetchMil() {
+      try {
+        const res = await base44.functions.invoke('adsbAllMil', {});
+        setLiveAircraft(res.data?.aircraft || []);
+      } catch (e) {
+        console.warn('adsbAllMil failed:', e.message);
+      }
+    }
+    fetchMil();
+    const interval = setInterval(fetchMil, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
+
+  // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
+  const enRouteCallsigns = new Set(enRouteFlights.map(f => f.callsign.toUpperCase()));
+  const extraAircraft = liveAircraft.filter(ac => {
+    const cs = (ac.flight || ac.hex || '').trim().toUpperCase();
+    return !enRouteCallsigns.has(cs);
+  });
 
   return (
     <div className="h-full relative">
@@ -97,12 +116,11 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
         />
         <FlyToSelected flights={flights} selectedFlight={selectedFlight} />
 
-        {/* Route lines */}
+        {/* Route lines for ACARS flights */}
         {enRouteFlights.map((flight) => {
           const depCoords = militaryBases[flight.departure];
           const destCoords = militaryBases[flight.destination];
           if (!depCoords || !destCoords) return null;
-
           return (
             <Polyline
               key={`route-${flight.id}`}
@@ -117,18 +135,13 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
           );
         })}
 
-        {/* Aircraft markers */}
+        {/* ACARS-enriched flight markers */}
         {enRouteFlights.map((flight) => (
           <Marker
             key={flight.id}
             position={[flight.lat, flight.lng]}
-            icon={createAircraftIcon(
-              getBranchHexColor(flight.branch),
-              selectedFlight === flight.id
-            )}
-            eventHandlers={{
-              click: () => onSelectFlight(flight.id),
-            }}
+            icon={createAircraftIcon(getBranchHexColor(flight.branch), selectedFlight === flight.id)}
+            eventHandlers={{ click: () => onSelectFlight(flight.id) }}
           >
             <Popup className="military-popup">
               <div className="min-w-48">
@@ -146,6 +159,32 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
             </Popup>
           </Marker>
         ))}
+
+        {/* Live adsb.lol military aircraft (grey markers) */}
+        {extraAircraft.map((ac) => {
+          const callsign = (ac.flight || ac.hex || 'MIL').trim();
+          return (
+            <Marker
+              key={ac.hex || callsign}
+              position={[ac.lat, ac.lon]}
+              icon={createAircraftIcon('#94a3b8', false)}
+            >
+              <Popup>
+                <div className="min-w-40">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-mono font-bold text-sm">{callsign}</span>
+                    {ac.t && <span className="text-xs text-gray-400">{ac.t}</span>}
+                  </div>
+                  <div className="text-xs text-gray-400 space-y-0.5">
+                    {ac.alt_baro != null && <div>Alt: FL{Math.round(ac.alt_baro / 100)}</div>}
+                    {ac.gs != null && <div>Speed: {Math.round(ac.gs)} kts</div>}
+                    {ac.r && <div>Reg: {ac.r}</div>}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
 
       {/* Map overlay info */}
@@ -158,7 +197,7 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            {enRouteFlights.length} aircraft tracked
+            {enRouteFlights.length + extraAircraft.length} aircraft tracked
           </p>
         </div>
       </div>
