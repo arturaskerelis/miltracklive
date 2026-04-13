@@ -13,9 +13,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-function createAircraftIcon(color, isSelected, callsign = "", aircraftType = "") {
+function createAircraftIcon(color, isSelected, callsign = "", aircraftType = "", flags = []) {
   const size = isSelected ? 28 : 22;
-  const labelWidth = Math.max(110, Math.min(180, Math.max(callsign.length, aircraftType.length) * 8));
+  const labelWidth = Math.max(130, Math.min(220, Math.max(callsign.length, aircraftType.length) * 8));
+  const flagsHtml = flags.length
+    ? `<div style="display:flex; gap:4px; margin-top:4px; flex-wrap:wrap;">${flags.map((flag) => `<span style="font-size:9px; line-height:1; padding:3px 5px; border-radius:999px; border:1px solid ${flag.border}; color:${flag.text}; background:${flag.background}; font-weight:700; letter-spacing:0.04em;">${flag.label}</span>`).join('')}</div>`
+    : "";
+
   return L.divIcon({
     className: "aircraft-icon",
     html: `<div style="display:flex; align-items:center; gap:8px;">
@@ -45,6 +49,7 @@ function createAircraftIcon(color, isSelected, callsign = "", aircraftType = "")
       ">
         <div style="font-size: 11px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${callsign || 'MIL'}</div>
         <div style="font-size: 10px; line-height: 1.1; color: rgba(255,255,255,0.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">${aircraftType || 'Unknown'}</div>
+        ${flagsHtml}
       </div>
     </div>`,
     iconSize: [size + labelWidth + 8, size],
@@ -93,7 +98,7 @@ const militaryBases = {
   OAKN: [31.5058, 65.8478],
 };
 
-export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
+export default function MapPanel({ flights, messages = [], selectedFlight, onSelectFlight }) {
   const [liveAircraft, setLiveAircraft] = useState([]);
 
   useEffect(() => {
@@ -111,6 +116,7 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
   }, []);
 
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
+  const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
   const enRouteCallsigns = new Set(enRouteFlights.map(f => f.callsign.toUpperCase()));
@@ -163,7 +169,13 @@ export default function MapPanel({ flights, selectedFlight, onSelectFlight }) {
               getBranchHexColor(flight.branch),
               selectedFlight === flight.id,
               flight.callsign,
-              flight.aircraftType
+              flight.aircraftType,
+              [
+                { label: 'INI', border: 'rgba(96,165,250,0.35)', text: '#93c5fd', background: 'rgba(59,130,246,0.12)' },
+                ...(flightIdsWithFtx.has(flight.id)
+                  ? [{ label: 'FTX', border: 'rgba(251,191,36,0.35)', text: '#fcd34d', background: 'rgba(245,158,11,0.14)' }]
+                  : []),
+              ]
             )}
             eventHandlers={{ click: () => onSelectFlight(flight.id) }}
           >

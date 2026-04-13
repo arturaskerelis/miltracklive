@@ -68,6 +68,7 @@ export default function Dashboard() {
           <div className="col-span-5 overflow-hidden border-x border-border">
             <MapPanel
               flights={filteredFlights}
+              messages={filteredMessages}
               selectedFlight={selectedFlight}
               onSelectFlight={handleSelectFlight}
             />
