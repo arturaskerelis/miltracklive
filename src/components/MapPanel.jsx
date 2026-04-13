@@ -192,7 +192,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   });
 
   return (
-    <div className="h-full relative">
+    <div className="h-full relative" data-flight-select="true">
       <MapContainer
         center={[35, 10]}
         zoom={3}
