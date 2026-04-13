@@ -111,7 +111,7 @@ export function parseINItoFlightPlan(msg) {
   // Try to extract route — prefer the segment before the final slash, e.g. /AFOTBH,ETAR/ => OTBH, ETAR
   let departure = "????";
   let destination = "????";
-  const routeBeforeFinalSlash = text.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\/[A-Z0-9]+$/i);
+  const routeBeforeFinalSlash = text.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\//i);
   const routeSlash = text.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
   const routeDot = text.match(/([A-Z]{4})[/.]([A-Z]{4})/);
   const depDest = text.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
