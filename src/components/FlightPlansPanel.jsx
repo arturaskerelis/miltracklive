@@ -1,4 +1,4 @@
-import { Plane, Clock, ArrowRight } from "lucide-react";
+import { Plane, Clock, ArrowRight, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getStatusColor, getBranchColor } from "../lib/mockData";
@@ -27,19 +27,20 @@ function FlightRow({ flight, isSelected, onSelect }) {
       </div>
 
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-        <span className="font-mono">{flight.departure}</span>
+        <span className="font-mono">{flight.departure || '????'}</span>
         <ArrowRight className="w-3 h-3" />
-        <span className="font-mono">{flight.destination}</span>
+        <span className="font-mono">{flight.destination || '????'}</span>
         <span className="mx-1 opacity-40">|</span>
         <span>{flight.aircraftType}</span>
       </div>
 
       <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
         <div className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          <span>ETD {moment(flight.etd).format("HHmm")}Z</span>
-          <span className="opacity-40">→</span>
-          <span>ETA {moment(flight.eta).format("HHmm")}Z</span>
+          <CalendarDays className="w-3 h-3" />
+          <span>{moment(flight.etd).format("DD MMM HH:mm")}Z</span>
+          {flight.altitude > 0 && (
+            <><span className="opacity-40 mx-1">·</span><span>FL{Math.round(flight.altitude / 100)}</span></>
+          )}
         </div>
         <span className="font-mono text-primary/70">{flight.missionCode}</span>
       </div>
@@ -48,6 +49,7 @@ function FlightRow({ flight, isSelected, onSelect }) {
 }
 
 export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlight }) {
+  const sorted = [...flights].sort((a, b) => new Date(b.etd) - new Date(a.etd));
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
       <div className="px-3 py-2.5 border-b border-border flex items-center justify-between shrink-0">
@@ -65,7 +67,7 @@ export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlig
       </div>
 
       <ScrollArea className="flex-1">
-        {flights.map((flight) => (
+        {sorted.map((flight) => (
           <FlightRow
             key={flight.id}
             flight={flight}
@@ -73,7 +75,7 @@ export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlig
             onSelect={onSelectFlight}
           />
         ))}
-        {flights.length === 0 && (
+        {sorted.length === 0 && (
           <div className="p-6 text-center text-xs text-muted-foreground">
             No flights match current filters
           </div>

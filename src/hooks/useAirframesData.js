@@ -5,6 +5,7 @@ import {
   parseINItoFlightPlan,
   parseFTXtoMessage,
 } from "../lib/airframesService";
+import { base44 } from '@/api/base44Client';
 import { flightPlans as mockFlights, freeTextMessages as mockMessages } from "../lib/mockData";
 
 const POLL_INTERVAL = 6 * 60; // 6 minutes in seconds (2 calls × 250 = 500/day)
@@ -37,6 +38,34 @@ export default function useAirframesData() {
           }
         });
         const parsedFlights = Array.from(flightMap.values());
+
+        // Enrich with live ADSB data from adsb.lol
+        try {
+          const callsigns = parsedFlights.map((f) => f.callsign);
+          const hexes = parsedFlights
+            .filter((f) => f._rawMsg?.airframe?.icao)
+            .map((f) => ({ callsign: f.callsign, hex: f._rawMsg.airframe.icao }));
+          const enrichRes = await base44.functions.invoke('adsbEnrich', { callsigns, hexes });
+          const adsbMap = enrichRes.data?.results || {};
+          parsedFlights.forEach((fp) => {
+            const ac = adsbMap[fp.callsign];
+            if (ac) {
+              if (ac.lat != null) fp.lat = ac.lat;
+              if (ac.lon != null) fp.lng = ac.lon;
+              if (ac.alt_baro != null) fp.altitude = ac.alt_baro;
+              if (ac.gs != null) fp.speed = Math.round(ac.gs);
+              if (ac.track != null) fp.heading = Math.round(ac.track);
+              if (ac.flight) fp.callsign = ac.flight.trim();
+              if (ac.t) fp.aircraftType = ac.t;
+              if (ac.dep) fp.departure = ac.dep;
+              if (ac.dst) fp.destination = ac.dst;
+              fp.status = 'en-route';
+            }
+          });
+        } catch (e) {
+          console.warn('ADSB enrich failed:', e.message);
+        }
+
         const callsignToId = new Map(parsedFlights.map((f) => [f.callsign, f.id]));
         const parsedMessages = ftxRaw.map((msg) => {
           const callsign = (typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight || '').toUpperCase();
