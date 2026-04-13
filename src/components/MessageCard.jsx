@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { decodeMessage, getMessageCategory } from "../lib/decoder";
 import moment from "moment";
 
-export default function MessageCard({ message, isHighlighted, onClick }) {
+export default function MessageCard({ message, flight, isHighlighted, onClick }) {
   const decoded = decodeMessage(message.rawText);
   const category = getMessageCategory(message.rawText);
 
@@ -16,10 +16,15 @@ export default function MessageCard({ message, isHighlighted, onClick }) {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono font-semibold text-sm text-foreground">
             {message.callsign}
           </span>
+          {flight && flight.departure && flight.destination && (
+            <span className="font-mono text-[10px] text-muted-foreground/70">
+              {flight.departure} → {flight.destination}
+            </span>
+          )}
           <Badge
             variant="outline"
             className={`text-[10px] px-1.5 py-0 ${category.color}`}
@@ -27,7 +32,7 @@ export default function MessageCard({ message, isHighlighted, onClick }) {
             {category.label}
           </Badge>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0">
           <Clock className="w-3 h-3" />
           {moment(message.timestamp).format("HH:mm:ss")}Z
         </div>

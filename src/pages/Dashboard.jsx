@@ -71,6 +71,7 @@ export default function Dashboard() {
           <div className="col-span-4 overflow-hidden">
             <FreeTextFeed
               messages={filteredMessages}
+              flights={filteredFlights}
               selectedFlight={selectedFlight}
               onMessageClick={handleMessageClick}
             />
@@ -96,6 +97,7 @@ export default function Dashboard() {
           {activeTab === "freetext" && (
             <FreeTextFeed
               messages={filteredMessages}
+              flights={filteredFlights}
               selectedFlight={selectedFlight}
               onMessageClick={handleMessageClick}
             />
