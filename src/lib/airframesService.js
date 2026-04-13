@@ -47,16 +47,23 @@ export async function fetchFTXMessages() {
 export function parseINItoFlightPlan(msg) {
   const text = msg.text || "";
 
-  // Try to extract route: common format "KDOV.ETAR" or "KDOV/ETAR"
-  const routeMatch = text.match(/([A-Z]{4})[/.]([A-Z]{4})/);
-  const departure = routeMatch?.[1] || "????";
-  const destination = routeMatch?.[2] || "????";
+  // Try to extract route — various formats: KDOV.ETAR, KDOV/ETAR, .KDOV/ETAR., DEP/KDOV DEST/ETAR
+  let departure = "????";
+  let destination = "????";
+  const routeSlash = text.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
+  const routeDot = text.match(/([A-Z]{4})[/.]([A-Z]{4})/);
+  const depDest = text.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
+  const orgDest = text.match(/ORG[/\s]*([A-Z]{4}).*?DST[/\s]*([A-Z]{4})/i);
+  if (routeSlash) { departure = routeSlash[1]; destination = routeSlash[2]; }
+  else if (depDest) { departure = depDest[1]; destination = depDest[2]; }
+  else if (orgDest) { departure = orgDest[1]; destination = orgDest[2]; }
+  else if (routeDot) { departure = routeDot[1]; destination = routeDot[2]; }
 
-  // Aircraft type from tail or text
-  const acTypeMatch = text.match(/\b(C17|C-17|C5|C-5|KC135|KC-135|KC10|KC-10|C130|C-130|B52|B-52|P8|P-8|A400|F16|F-16)\w*/i);
-  const aircraftType = acTypeMatch?.[0]?.toUpperCase() || getTail(msg) || "UNKNOWN";
+  // Aircraft type — from text patterns, ICAO type field (/B752/, /C17 etc), or tail
+  const acTypeMatch = text.match(/\/([A-Z][0-9A-Z]{2,5})\//) ||
+    text.match(/\b(C17A?|C-17A?|C5M?|C-5M?|KC135|KC-135|KC10|KC-10|C130J?|C-130J?|B52H?|B-52H?|P8A?|P-8A?|A400M?|F16C?|F-16C?|E3|E-3|E8|E-8|RC135|RC-135|WC135|WC-135|707|727|737|747|757|767|777|MD11|DC10|L100)\b/i);
+  const aircraftType = acTypeMatch?.[1]?.toUpperCase() || acTypeMatch?.[0]?.toUpperCase() || getTail(msg) || "UNKNOWN";
 
-  // Determine branch from callsign pattern
   const callsign = getCallsign(msg).toUpperCase() || "UNKNWN";
   const branch = guessBranch(callsign);
   const missionType = guessMissionType(callsign, text);
