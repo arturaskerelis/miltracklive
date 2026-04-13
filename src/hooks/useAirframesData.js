@@ -9,11 +9,33 @@ import {
 
 import { flightPlans as mockFlights, freeTextMessages as mockMessages } from "../lib/mockData";
 
+const STORAGE_KEY = "miltrack-live-cache";
+
 const POLL_INTERVAL = 6 * 60; // 6 minutes in seconds (2 calls × 250 = 500/day)
 
 export default function useAirframesData() {
-  const [flights, setFlights] = useState([]);
-  const [messages, setMessages] = useState([]);
+  const [flights, setFlights] = useState(() => {
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      try {
+        return JSON.parse(cached).flights || mockFlights;
+      } catch {
+        return mockFlights;
+      }
+    }
+    return mockFlights;
+  });
+  const [messages, setMessages] = useState(() => {
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      try {
+        return JSON.parse(cached).messages || mockMessages;
+      } catch {
+        return mockMessages;
+      }
+    }
+    return mockMessages;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
   const [error, setError] = useState(null);
@@ -105,8 +127,11 @@ export default function useAirframesData() {
           console.warn('AI decode failed:', e.message);
         }
 
-        setFlights(parsedFlights.length > 0 ? parsedFlights : mockFlights);
-        setMessages(parsedMessages.length > 0 ? parsedMessages : mockMessages);
+        const nextFlights = parsedFlights.length > 0 ? parsedFlights : mockFlights;
+        const nextMessages = parsedMessages.length > 0 ? parsedMessages : mockMessages;
+        setFlights(nextFlights);
+        setMessages(nextMessages);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ flights: nextFlights, messages: nextMessages }));
         setIsLive(true);
         setError(null);
       }
@@ -114,8 +139,6 @@ export default function useAirframesData() {
     } catch (err) {
       console.warn("Airframes fetch failed:", err.message);
       setError("Live feed unavailable");
-      setFlights(mockFlights);
-      setMessages(mockMessages);
       setIsLive(false);
     }
     setIsLoading(false);
@@ -125,7 +148,9 @@ export default function useAirframesData() {
   }, []);
 
   useEffect(() => {
-    fetchAll();
+    const initialRefresh = setTimeout(() => {
+      fetchAll();
+    }, 0);
 
     // Poll every 6 minutes
     timerRef.current = setInterval(fetchAll, POLL_INTERVAL * 1000);
@@ -137,6 +162,7 @@ export default function useAirframesData() {
     }, 1000);
 
     return () => {
+      clearTimeout(initialRefresh);
       clearInterval(timerRef.current);
       clearInterval(tickRef.current);
     };

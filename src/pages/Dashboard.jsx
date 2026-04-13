@@ -45,8 +45,6 @@ export default function Dashboard() {
         onTimezoneChange={setTimezone}
       />
 
-      {isLoading && allFlights.length === 0 && <LiveDataLoadingPlaceholder />}
-
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
       <div className="flex-1 overflow-hidden">
         {/* Desktop layout (hidden on mobile) */}
