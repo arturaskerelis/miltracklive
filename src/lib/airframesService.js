@@ -36,6 +36,12 @@ function getCallsign(msg) {
 }
 
 function getHex(msg) {
+  const text = (msg.text || '').trim();
+  const structuredHeaderMatch = text.match(/FTX\/ID([^,\/]+),/i);
+  if (structuredHeaderMatch) {
+    return structuredHeaderMatch[1].trim().toUpperCase();
+  }
+
   if (typeof msg.airframe === 'object' && msg.airframe !== null) {
     return msg.airframe.hex || msg.airframe.icaoHex || msg.airframe.icao || '';
   }
