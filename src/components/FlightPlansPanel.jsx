@@ -42,7 +42,7 @@ function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
           )}
           {flight.hasAcars && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/30 text-amber-400">
-              ACARS
+              FTX
             </Badge>
           )}
           <span className={`text-[10px] font-medium ${branchClass}`}>{flight.branch}</span>
