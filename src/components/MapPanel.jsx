@@ -162,8 +162,8 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         <FlyToSelected flights={flights} selectedFlight={selectedFlight} />
         <ClearSelectionOnMapClick onClearSelection={() => onSelectFlight(null)} />
 
-        {/* Route lines for ACARS flights */}
-        {enRouteFlights.map((flight) => {
+        {/* Background route lines for ACARS flights */}
+        {enRouteFlights.filter((flight) => flight.id !== selectedFlight).map((flight) => {
           const depCoords = militaryBases[flight.departure];
           const destCoords = militaryBases[flight.destination];
           if (!depCoords || !destCoords) return null;
@@ -173,58 +173,13 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
               positions={[depCoords, [flight.lat, flight.lng], destCoords]}
               pathOptions={{
                 color: getBranchHexColor(flight.branch),
-                weight: selectedFlight === flight.id ? 4 : 1,
-                opacity: selectedFlight === flight.id ? 0.95 : 0.25,
+                weight: 1,
+                opacity: 0.25,
                 dashArray: "8 6",
               }}
             />
           );
         })}
-
-        {/* Route lines for selected or hovered flights with known routes */}
-        {selectedKnownRouteFlight && (
-          <Polyline
-            key={`selected-route-${selectedKnownRouteFlight.id}`}
-            positions={selectedKnownRouteFlight.lat && selectedKnownRouteFlight.lng
-              ? [
-                  militaryBases[selectedKnownRouteFlight.departure],
-                  [selectedKnownRouteFlight.lat, selectedKnownRouteFlight.lng],
-                  militaryBases[selectedKnownRouteFlight.destination],
-                ]
-              : [
-                  militaryBases[selectedKnownRouteFlight.departure],
-                  militaryBases[selectedKnownRouteFlight.destination],
-                ]}
-            pathOptions={{
-              color: getBranchHexColor(selectedKnownRouteFlight.branch),
-              weight: 4,
-              opacity: 0.95,
-              dashArray: "6 6",
-            }}
-          />
-        )}
-
-        {!selectedKnownRouteFlight && hoveredKnownRouteFlight && (
-          <Polyline
-            key={`hovered-route-${hoveredKnownRouteFlight.id}`}
-            positions={hoveredKnownRouteFlight.lat && hoveredKnownRouteFlight.lng
-              ? [
-                  militaryBases[hoveredKnownRouteFlight.departure],
-                  [hoveredKnownRouteFlight.lat, hoveredKnownRouteFlight.lng],
-                  militaryBases[hoveredKnownRouteFlight.destination],
-                ]
-              : [
-                  militaryBases[hoveredKnownRouteFlight.departure],
-                  militaryBases[hoveredKnownRouteFlight.destination],
-                ]}
-            pathOptions={{
-              color: getBranchHexColor(hoveredKnownRouteFlight.branch),
-              weight: 3,
-              opacity: 0.9,
-              dashArray: "6 6",
-            }}
-          />
-        )}
 
         {/* ACARS-enriched flight markers */}
         {enRouteFlights.map((flight) => (
@@ -330,6 +285,51 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
             </Marker>
           );
         })}
+
+        {/* Active route lines rendered last so they stay visible */}
+        {selectedKnownRouteFlight && (
+          <Polyline
+            key={`selected-route-${selectedKnownRouteFlight.id}`}
+            positions={selectedKnownRouteFlight.lat && selectedKnownRouteFlight.lng
+              ? [
+                  militaryBases[selectedKnownRouteFlight.departure],
+                  [selectedKnownRouteFlight.lat, selectedKnownRouteFlight.lng],
+                  militaryBases[selectedKnownRouteFlight.destination],
+                ]
+              : [
+                  militaryBases[selectedKnownRouteFlight.departure],
+                  militaryBases[selectedKnownRouteFlight.destination],
+                ]}
+            pathOptions={{
+              color: getBranchHexColor(selectedKnownRouteFlight.branch),
+              weight: 5,
+              opacity: 1,
+              dashArray: "6 6",
+            }}
+          />
+        )}
+
+        {!selectedKnownRouteFlight && hoveredKnownRouteFlight && (
+          <Polyline
+            key={`hovered-route-${hoveredKnownRouteFlight.id}`}
+            positions={hoveredKnownRouteFlight.lat && hoveredKnownRouteFlight.lng
+              ? [
+                  militaryBases[hoveredKnownRouteFlight.departure],
+                  [hoveredKnownRouteFlight.lat, hoveredKnownRouteFlight.lng],
+                  militaryBases[hoveredKnownRouteFlight.destination],
+                ]
+              : [
+                  militaryBases[hoveredKnownRouteFlight.departure],
+                  militaryBases[hoveredKnownRouteFlight.destination],
+                ]}
+            pathOptions={{
+              color: getBranchHexColor(hoveredKnownRouteFlight.branch),
+              weight: 4,
+              opacity: 0.95,
+              dashArray: "6 6",
+            }}
+          />
+        )}
       </MapContainer>
 
       {/* Map overlay info */}
