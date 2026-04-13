@@ -42,10 +42,7 @@ export default function useAirframesData() {
         // Enrich with live ADSB data from adsb.lol
         try {
           const callsigns = parsedFlights.map((f) => f.callsign);
-          const hexes = parsedFlights
-            .filter((f) => f._rawMsg?.airframe?.icao)
-            .map((f) => ({ callsign: f.callsign, hex: f._rawMsg.airframe.icao }));
-          const enrichRes = await base44.functions.invoke('adsbEnrich', { callsigns, hexes });
+          const enrichRes = await base44.functions.invoke('adsbEnrich', { callsigns });
           const adsbMap = enrichRes.data?.results || {};
           parsedFlights.forEach((fp) => {
             const ac = adsbMap[fp.callsign];
