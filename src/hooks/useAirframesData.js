@@ -7,8 +7,6 @@ import {
   parseFTXtoMessage,
 } from "../lib/airframesService";
 
-import { flightPlans as mockFlights, freeTextMessages as mockMessages } from "../lib/mockData";
-
 const STORAGE_KEY = "miltrack-live-cache";
 
 const POLL_INTERVAL = 6 * 60; // 6 minutes in seconds (2 calls × 250 = 500/day)
@@ -16,28 +14,24 @@ const POLL_INTERVAL = 6 * 60; // 6 minutes in seconds (2 calls × 250 = 500/day)
 export default function useAirframesData() {
   const [flights, setFlights] = useState(() => {
     const cached = localStorage.getItem(STORAGE_KEY);
-    if (cached) {
-      try {
-        return JSON.parse(cached).flights || mockFlights;
-      } catch {
-        return mockFlights;
-      }
+    if (!cached) return [];
+    try {
+      return JSON.parse(cached).flights || [];
+    } catch {
+      return [];
     }
-    return mockFlights;
   });
   const [messages, setMessages] = useState(() => {
     const cached = localStorage.getItem(STORAGE_KEY);
-    if (cached) {
-      try {
-        return JSON.parse(cached).messages || mockMessages;
-      } catch {
-        return mockMessages;
-      }
+    if (!cached) return [];
+    try {
+      return JSON.parse(cached).messages || [];
+    } catch {
+      return [];
     }
-    return mockMessages;
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(() => !!localStorage.getItem(STORAGE_KEY));
   const [error, setError] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(null);
   const [countdown, setCountdown] = useState(POLL_INTERVAL);
@@ -51,7 +45,7 @@ export default function useAirframesData() {
       const [iniRaw, ftxRaw] = await Promise.all([fetchINIMessages(), fetchFTXMessages()]);
 
       if (iniRaw.length === 0 && ftxRaw.length === 0) {
-        setError("No live data returned — showing demo data");
+        setError("No live data returned");
         setIsLive(false);
       } else {
         const flightMap = new Map();
@@ -127,8 +121,8 @@ export default function useAirframesData() {
           console.warn('AI decode failed:', e.message);
         }
 
-        const nextFlights = parsedFlights.length > 0 ? parsedFlights : mockFlights;
-        const nextMessages = parsedMessages.length > 0 ? parsedMessages : mockMessages;
+        const nextFlights = parsedFlights;
+        const nextMessages = parsedMessages;
         setFlights(nextFlights);
         setMessages(nextMessages);
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ flights: nextFlights, messages: nextMessages }));
