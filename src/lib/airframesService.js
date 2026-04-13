@@ -163,7 +163,7 @@ export function parseINItoFlightPlan(msg) {
     etd: msg.timestamp || msg.createdAt,
     eta: null,
     missionCode: extractMissionCode(text) || callsign,
-    status: "en-route",
+    status: "filed",
     branch,
     missionType,
     lat: msg.latitude || null,

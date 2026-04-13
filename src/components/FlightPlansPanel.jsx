@@ -96,7 +96,7 @@ export default function FlightPlansPanel({ flights, messages = [], selectedFligh
             Flight Plans
           </h2>
           <p className="text-[10px] text-muted-foreground">
-            {flights.length} active military flights
+            {flights.length} tracked military flights
           </p>
         </div>
         <Badge variant="outline" className="font-mono text-[10px]">
