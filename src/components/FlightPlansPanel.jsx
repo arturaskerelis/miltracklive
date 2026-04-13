@@ -1,12 +1,13 @@
 import { Plane, Clock, ArrowRight, CalendarDays } from "lucide-react";
 import useNow from "../hooks/useNow";
+import { formatInTZ } from "../hooks/useZuluClock";
 import { relativeTime } from "../lib/relativeTime";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getStatusColor, getBranchColor } from "../lib/mockData";
 import moment from "moment";
 
-function FlightRow({ flight, isSelected, onSelect, now }) {
+function FlightRow({ flight, isSelected, onSelect, now, timezone }) {
   const statusClass = getStatusColor(flight.status);
   const branchClass = getBranchColor(flight.branch);
 
@@ -39,7 +40,7 @@ function FlightRow({ flight, isSelected, onSelect, now }) {
       <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
         <div className="flex items-center gap-1">
           <CalendarDays className="w-3 h-3" />
-          <span>{moment(flight.etd).format("DD MMM HH:mm")}Z</span>
+          <span>{formatInTZ(flight.etd, timezone, "DD MMM HH:mm")}</span>
           {flight.etd && flight.status !== 'en-route' && (() => {
             const diffMs = new Date(flight.etd).getTime() - now;
             if (diffMs > 0) {
@@ -59,7 +60,7 @@ function FlightRow({ flight, isSelected, onSelect, now }) {
   );
 }
 
-export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlight }) {
+export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlight, timezone = "UTC" }) {
   const now = useNow();
   const sorted = [...flights].sort((a, b) => new Date(b.etd) - new Date(a.etd));
   return (
@@ -86,6 +87,7 @@ export default function FlightPlansPanel({ flights, selectedFlight, onSelectFlig
             isSelected={selectedFlight === flight.id}
             onSelect={onSelectFlight}
             now={now}
+            timezone={timezone}
           />
         ))}
         {sorted.length === 0 && (

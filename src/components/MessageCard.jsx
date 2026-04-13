@@ -1,11 +1,12 @@
 import { Sparkles, Clock } from "lucide-react";
 import useNow from "../hooks/useNow";
+import { formatInTZ } from "../hooks/useZuluClock";
 import { relativeTime } from "../lib/relativeTime";
 import { Badge } from "@/components/ui/badge";
 import { decodeMessage, getMessageCategory } from "../lib/decoder";
 import moment from "moment";
 
-export default function MessageCard({ message, flight, isHighlighted, onClick }) {
+export default function MessageCard({ message, flight, isHighlighted, onClick, timezone = "UTC" }) {
   const now = useNow();
   const decoded = decodeMessage(message.rawText);
   const category = getMessageCategory(message.rawText);
@@ -37,7 +38,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick })
         </div>
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0">
           <Clock className="w-3 h-3" />
-          {moment.utc(message.timestamp).format("HH:mm:ss")}Z
+          {formatInTZ(message.timestamp, timezone, "HH:mm:ss")}
           {relativeTime(message.timestamp, now) && (
             <span className="opacity-50">· {relativeTime(message.timestamp, now)}</span>
           )}

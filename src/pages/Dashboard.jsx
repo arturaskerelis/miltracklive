@@ -9,6 +9,7 @@ import moment from "moment";
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("map");
   const [selectedFlight, setSelectedFlight] = useState(null);
+  const [timezone, setTimezone] = useState("UTC");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch } = useAirframesData();
 
@@ -41,6 +42,8 @@ export default function Dashboard() {
         countdown={countdown}
         onRefresh={handleRefresh}
         isRefreshing={isRefreshing}
+        timezone={timezone}
+        onTimezoneChange={setTimezone}
       />
 
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
@@ -52,6 +55,7 @@ export default function Dashboard() {
               flights={filteredFlights}
               selectedFlight={selectedFlight}
               onSelectFlight={handleSelectFlight}
+              timezone={timezone}
             />
           </div>
           <div className="col-span-5 overflow-hidden border-x border-border">
@@ -67,6 +71,7 @@ export default function Dashboard() {
               flights={filteredFlights}
               selectedFlight={selectedFlight}
               onMessageClick={handleMessageClick}
+              timezone={timezone}
             />
           </div>
         </div>
@@ -78,6 +83,7 @@ export default function Dashboard() {
               flights={filteredFlights}
               selectedFlight={selectedFlight}
               onSelectFlight={handleSelectFlight}
+              timezone={timezone}
             />
           )}
           {activeTab === "map" && (
@@ -93,6 +99,7 @@ export default function Dashboard() {
               flights={filteredFlights}
               selectedFlight={selectedFlight}
               onMessageClick={handleMessageClick}
+              timezone={timezone}
             />
           )}
         </div>

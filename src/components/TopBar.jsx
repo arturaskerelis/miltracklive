@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
-import { Radar, Sun, Moon, Plane, Radio, Map, RefreshCw } from "lucide-react";
+import { Radar, Sun, Moon, Plane, Radio, Map, RefreshCw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import useZuluClock, { TIMEZONES } from "../hooks/useZuluClock";
 
 function formatCountdown(seconds) {
   const m = Math.floor(seconds / 60);
@@ -19,8 +27,12 @@ export default function TopBar({
   countdown,
   onRefresh,
   isRefreshing,
+  timezone,
+  onTimezoneChange,
 }) {
   const [dark, setDark] = useState(true);
+  const clockTime = useZuluClock(timezone);
+  const tzLabel = timezone === "UTC" ? "Z" : TIMEZONES.find(t => t.value === timezone)?.label?.split(" ")[0] || timezone;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -29,7 +41,7 @@ export default function TopBar({
   return (
     <header className="h-14 border-b border-border bg-card/80 backdrop-blur-xl flex items-center px-4 gap-3 shrink-0 z-50">
       {/* Logo */}
-      <div className="flex items-center gap-2 mr-4">
+      <div className="flex items-center gap-2 mr-2">
         <div className="relative">
           <Radar className="w-6 h-6 text-primary" />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full animate-pulse-glow" />
@@ -39,8 +51,29 @@ export default function TopBar({
         </span>
       </div>
 
+      {/* Live Clock */}
+      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-muted/40">
+        <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
+        <span className="font-mono text-sm tabular-nums font-medium">{clockTime}</span>
+        <span className="font-mono text-[10px] text-muted-foreground">{tzLabel}</span>
+      </div>
+
+      {/* Timezone selector */}
+      <Select value={timezone} onValueChange={onTimezoneChange}>
+        <SelectTrigger className="h-8 text-xs w-36 font-mono">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {TIMEZONES.map((tz) => (
+            <SelectItem key={tz.value} value={tz.value} className="text-xs font-mono">
+              {tz.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       {/* Tabs */}
-      <nav className="flex items-center gap-1 border border-border rounded-lg p-0.5 bg-muted/50">
+      <nav className="flex items-center gap-1 border border-border rounded-lg p-0.5 bg-muted/50 ml-1">
         {[
           { id: "plans", icon: Plane, label: "Flight Plans" },
           { id: "map", icon: Map, label: "Map View" },

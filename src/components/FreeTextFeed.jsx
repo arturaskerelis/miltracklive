@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MessageCard from "./MessageCard";
 
-export default function FreeTextFeed({ messages, flights = [], selectedFlight, onMessageClick }) {
+export default function FreeTextFeed({ messages, flights = [], selectedFlight, onMessageClick, timezone = "UTC" }) {
   const flightMap = Object.fromEntries(flights.map((f) => [f.id, f]));
   const filteredMessages = selectedFlight
     ? messages.filter((m) => m.flightPlanId === selectedFlight)
@@ -47,6 +47,7 @@ export default function FreeTextFeed({ messages, flights = [], selectedFlight, o
             flight={flightMap[msg.flightPlanId] || null}
             isHighlighted={selectedFlight === msg.flightPlanId}
             onClick={onMessageClick}
+            timezone={timezone}
           />
         ))}
         {sortedMessages.length === 0 && (
