@@ -107,16 +107,17 @@ export async function fetchFTXMessages() {
 // Parse an INI message into a flight plan object
 export function parseINItoFlightPlan(msg) {
   const text = msg.text || "";
+  const rawSource = [msg.text, msg.rawAcars, msg.message, msg.body].filter(Boolean).join(" ");
 
   // Try to extract route — prefer the segment before the final slash, e.g. /AFOTBH,ETAR/ => OTBH, ETAR
   let departure = "????";
   let destination = "????";
-  const routeBeforeFinalSlash = text.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\//i);
-  const routePair = text.match(/(?:^|\/|,)([A-Z]{4}),([A-Z]{4})(?=\/|,|$)/i);
-  const routeSlash = text.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
-  const routeDot = text.match(/([A-Z]{4})[/.]([A-Z]{4})/);
-  const depDest = text.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
-  const orgDest = text.match(/ORG[/\s]*([A-Z]{4}).*?DST[/\s]*([A-Z]{4})/i);
+  const routeBeforeFinalSlash = rawSource.match(/\/([A-Z]{6})([A-Z]{4}),([A-Z]{4})\//i);
+  const routePair = rawSource.match(/(?:^|\/|,)([A-Z]{4}),([A-Z]{4})(?=\/|,|$)/i);
+  const routeSlash = rawSource.match(/\.([A-Z]{4})\/([A-Z]{4})\./);
+  const routeDot = rawSource.match(/([A-Z]{4})[/.]([A-Z]{4})/);
+  const depDest = rawSource.match(/DEP[/\s]*([A-Z]{4}).*?DEST[/\s]*([A-Z]{4})/i);
+  const orgDest = rawSource.match(/ORG[/\s]*([A-Z]{4}).*?DST[/\s]*([A-Z]{4})/i);
   if (routeBeforeFinalSlash) { departure = routeBeforeFinalSlash[2]; destination = routeBeforeFinalSlash[3]; }
   else if (routePair) { departure = routePair[1]; destination = routePair[2]; }
   else if (routeSlash) { departure = routeSlash[1]; destination = routeSlash[2]; }
