@@ -67,7 +67,14 @@ export default function useAirframesData() {
         }
 
         const callsignToId = new Map(parsedFlights.map((f) => [f.callsign, f.id]));
-        const parsedMessages = ftxRaw.map((msg) => {
+        // Deduplicate FTX messages by id
+        const seenMsgIds = new Set();
+        const uniqueFtxRaw = ftxRaw.filter((msg) => {
+          if (seenMsgIds.has(msg.id)) return false;
+          seenMsgIds.add(msg.id);
+          return true;
+        });
+        const parsedMessages = uniqueFtxRaw.map((msg) => {
           // Extract callsign from flight field or first token of text
           let cs = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').trim().toUpperCase();
           if (!cs) {
