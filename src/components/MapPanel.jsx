@@ -125,10 +125,9 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   }, []);
 
   const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
+  const flightsWithKnownRoutes = flights.filter((f) => militaryBases[f.departure] && militaryBases[f.destination]);
   const filedFlights = flights.filter((f) => f.status === "filed" && militaryBases[f.departure]);
-  const selectedKnownRouteFlight = flights.find(
-    (flight) => flight.id === selectedFlight && militaryBases[flight.departure] && militaryBases[flight.destination]
-  );
+  const selectedKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === selectedFlight);
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
@@ -173,13 +172,19 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         })}
 
         {/* Route lines for selected or hovered flights with known routes */}
-        {selectedKnownRouteFlight && !selectedKnownRouteFlight.lat && (
+        {selectedKnownRouteFlight && (
           <Polyline
             key={`selected-route-${selectedKnownRouteFlight.id}`}
-            positions={[
-              militaryBases[selectedKnownRouteFlight.departure],
-              militaryBases[selectedKnownRouteFlight.destination],
-            ]}
+            positions={selectedKnownRouteFlight.lat && selectedKnownRouteFlight.lng
+              ? [
+                  militaryBases[selectedKnownRouteFlight.departure],
+                  [selectedKnownRouteFlight.lat, selectedKnownRouteFlight.lng],
+                  militaryBases[selectedKnownRouteFlight.destination],
+                ]
+              : [
+                  militaryBases[selectedKnownRouteFlight.departure],
+                  militaryBases[selectedKnownRouteFlight.destination],
+                ]}
             pathOptions={{
               color: getBranchHexColor(selectedKnownRouteFlight.branch),
               weight: 4,
