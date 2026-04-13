@@ -191,25 +191,6 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         <FlyToSelected flights={flights} selectedFlight={selectedFlight} />
         <ClearSelectionOnMapClick onClearSelection={() => onSelectFlight(null)} />
 
-        {/* Background route lines for ACARS flights */}
-        {enRouteFlights.filter((flight) => flight.id !== selectedFlight).map((flight) => {
-          const depCoords = allAirports[flight.departure];
-          const destCoords = allAirports[flight.destination];
-          if (!depCoords || !destCoords) return null;
-          return (
-            <Polyline
-              key={`route-${flight.id}`}
-              positions={[depCoords, [flight.lat, flight.lng], destCoords]}
-              pathOptions={{
-                color: getBranchHexColor(flight.branch),
-                weight: 1,
-                opacity: 0.25,
-                dashArray: "8 6",
-              }}
-            />
-          );
-        })}
-
         {/* ACARS-enriched flight markers */}
         {enRouteFlights.map((flight) => (
           <Marker
