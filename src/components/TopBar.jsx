@@ -11,6 +11,12 @@ import {
 } from "@/components/ui/select";
 import { filterOptions, missionFilterOptions } from "../lib/mockData";
 
+function formatCountdown(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 export default function TopBar({
   activeTab,
   onTabChange,
@@ -20,7 +26,9 @@ export default function TopBar({
   onMissionFilterChange,
   flightCount,
   messageCount,
-  lastRefresh,
+  isLive,
+  error,
+  countdown,
 }) {
   const [dark, setDark] = useState(true);
 
@@ -101,9 +109,19 @@ export default function TopBar({
           <Badge variant="outline" className="font-mono text-[10px] px-2 py-0.5 border-accent/30 text-accent">
             {messageCount} msgs
           </Badge>
-          {lastRefresh && (
-            <span className="text-[10px] opacity-60">
-              Updated {lastRefresh}
+          {/* Live / Demo indicator */}
+          <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border font-mono ${
+            isLive
+              ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
+              : 'border-amber-500/40 text-amber-400 bg-amber-500/10'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+            {isLive ? 'LIVE' : 'DEMO'}
+          </span>
+          {/* Countdown to next refresh */}
+          {countdown !== undefined && (
+            <span className="text-[10px] font-mono opacity-60 tabular-nums">
+              refresh {formatCountdown(countdown)}
             </span>
           )}
         </div>

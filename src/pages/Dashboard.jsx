@@ -3,7 +3,7 @@ import TopBar from "../components/TopBar";
 import FlightPlansPanel from "../components/FlightPlansPanel";
 import MapPanel from "../components/MapPanel";
 import FreeTextFeed from "../components/FreeTextFeed";
-import { flightPlans, freeTextMessages } from "../lib/mockData";
+import useAirframesData from "../hooks/useAirframesData";
 import moment from "moment";
 
 export default function Dashboard() {
@@ -11,18 +11,10 @@ export default function Dashboard() {
   const [branchFilter, setBranchFilter] = useState("all");
   const [missionFilter, setMissionFilter] = useState("all");
   const [selectedFlight, setSelectedFlight] = useState(null);
-  const [lastRefresh, setLastRefresh] = useState(moment().format("HH:mm:ss"));
-
-  // Auto-refresh simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLastRefresh(moment().format("HH:mm:ss"));
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const { flights: allFlights, messages: allMessages, isLive, error, countdown } = useAirframesData();
 
   const filteredFlights = useMemo(() => {
-    return flightPlans.filter((f) => {
+    return allFlights.filter((f) => {
       if (branchFilter !== "all" && f.branch !== branchFilter) return false;
       if (missionFilter !== "all" && f.missionType !== missionFilter) return false;
       return true;
@@ -31,8 +23,8 @@ export default function Dashboard() {
 
   const filteredMessages = useMemo(() => {
     const flightIds = new Set(filteredFlights.map((f) => f.id));
-    return freeTextMessages.filter((m) => flightIds.has(m.flightPlanId));
-  }, [filteredFlights]);
+    return allMessages.filter((m) => flightIds.has(m.flightPlanId));
+  }, [filteredFlights, allMessages]);
 
   const handleSelectFlight = (id) => {
     setSelectedFlight((prev) => (prev === id ? null : id));
@@ -53,7 +45,9 @@ export default function Dashboard() {
         onMissionFilterChange={setMissionFilter}
         flightCount={filteredFlights.length}
         messageCount={filteredMessages.length}
-        lastRefresh={lastRefresh}
+        isLive={isLive}
+        error={error}
+        countdown={countdown}
       />
 
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
