@@ -181,6 +181,10 @@ export function getMessageCategory(rawText) {
     return { label: "Refueling Interruption", color: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30" };
   }
 
+  if (text.includes("RAMP FUEL") || text.includes("FUEL LOAD") || text.includes("UPLIFT") || text.includes("FUELING")) {
+    return { label: "Fuel Load", color: "bg-lime-500/20 text-lime-300 border-lime-500/30" };
+  }
+
   if (text.includes("CARGO MANIFEST") || text.includes("AMMO") || text.includes("RESUPPLY")) {
     return { label: "Cargo / Resupply", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
   }
