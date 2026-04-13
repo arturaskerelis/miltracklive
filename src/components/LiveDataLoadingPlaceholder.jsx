@@ -8,7 +8,7 @@ const placeholderFlights = [
 
 export default function LiveDataLoadingPlaceholder() {
   return (
-    <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-sm">
+    <div className="absolute inset-x-0 top-14 bottom-0 z-40 bg-background/95 backdrop-blur-sm">
       <div className="h-full grid grid-cols-1 lg:grid-cols-12">
         <div className="lg:col-span-3 border-r border-border bg-card/50 p-4">
           <div className="flex items-center gap-2 mb-4">
