@@ -136,6 +136,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   const flightsWithKnownRoutes = flights.filter((f) => militaryBases[f.departure] && militaryBases[f.destination]);
   const filedFlights = flights.filter((f) => f.status === "filed" && militaryBases[f.departure]);
   const selectedKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === selectedFlight);
+  const hoveredKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === hoveredFlight);
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
@@ -203,24 +204,27 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           />
         )}
 
-        {filedFlights.map((flight) => {
-          const depCoords = militaryBases[flight.departure];
-          const destCoords = militaryBases[flight.destination];
-          const isActive = hoveredFlight === flight.id || selectedFlight === flight.id;
-          if (!depCoords || !destCoords || !isActive || selectedFlight === flight.id) return null;
-          return (
-            <Polyline
-              key={`filed-route-${flight.id}`}
-              positions={[depCoords, destCoords]}
-              pathOptions={{
-                color: getBranchHexColor(flight.branch),
-                weight: 3,
-                opacity: 0.9,
-                dashArray: "6 6",
-              }}
-            />
-          );
-        })}
+        {!selectedKnownRouteFlight && hoveredKnownRouteFlight && (
+          <Polyline
+            key={`hovered-route-${hoveredKnownRouteFlight.id}`}
+            positions={hoveredKnownRouteFlight.lat && hoveredKnownRouteFlight.lng
+              ? [
+                  militaryBases[hoveredKnownRouteFlight.departure],
+                  [hoveredKnownRouteFlight.lat, hoveredKnownRouteFlight.lng],
+                  militaryBases[hoveredKnownRouteFlight.destination],
+                ]
+              : [
+                  militaryBases[hoveredKnownRouteFlight.departure],
+                  militaryBases[hoveredKnownRouteFlight.destination],
+                ]}
+            pathOptions={{
+              color: getBranchHexColor(hoveredKnownRouteFlight.branch),
+              weight: 3,
+              opacity: 0.9,
+              dashArray: "6 6",
+            }}
+          />
+        )}
 
         {/* ACARS-enriched flight markers */}
         {enRouteFlights.map((flight) => (
