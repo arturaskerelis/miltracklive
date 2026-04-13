@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import TopBar from "../components/TopBar";
 import FlightPlansPanel from "../components/FlightPlansPanel";
 import MapPanel from "../components/MapPanel";
 import FreeTextFeed from "../components/FreeTextFeed";
+import LiveDataLoadingPlaceholder from "../components/LiveDataLoadingPlaceholder";
 import useAirframesData from "../hooks/useAirframesData";
-import moment from "moment";
 
 export default function Dashboard() {
   const [selectedFlight, setSelectedFlight] = useState(null);
@@ -45,12 +45,7 @@ export default function Dashboard() {
         onTimezoneChange={setTimezone}
       />
 
-      {isLoading && allFlights.length === 0 && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-background/80 backdrop-blur-sm">
-          <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin mb-3" />
-          <p className="text-xs text-muted-foreground font-mono">Fetching live data…</p>
-        </div>
-      )}
+      {isLoading && allFlights.length === 0 && <LiveDataLoadingPlaceholder />}
 
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
       <div className="flex-1 overflow-hidden">
