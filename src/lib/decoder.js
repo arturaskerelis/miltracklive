@@ -152,10 +152,10 @@ export function getMessageCategory(rawText) {
     return { label: "Maintenance", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" };
   if (text.includes("MEDEVAC") || text.includes("PATIENT") || text.includes("SURG") || text.includes("VITALS"))
     return { label: "Medical", color: "bg-red-500/20 text-red-300 border-red-500/30" };
-  if (text.includes("AR ") || text.includes("BOOM") || text.includes("OFFLOAD") || text.includes("RCVR") || text.includes("ANCHOR"))
-    return { label: "Aerial Refueling", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
-  if (text.includes("WX") || text.includes("DIVERT") || text.includes("TURB"))
+  if (text.includes("WX") || text.includes("DIVERT") || text.includes("TURB") || text.includes("METAR") || text.includes("ATIS"))
     return { label: "Weather", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" };
+  if (text.includes(" AR ") || text.includes("AR TRACK") || text.includes("AR COMPLETE") || text.includes("BOOM") || text.includes("OFFLOAD") || text.includes("RCVR") || text.includes("ANCHOR"))
+    return { label: "Aerial Refueling", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
   if (text.includes("CARGO") || text.includes("LOAD") || text.includes("PALLET"))
     return { label: "Cargo", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" };
   if (text.includes("POS RPT") || text.includes("FL"))
