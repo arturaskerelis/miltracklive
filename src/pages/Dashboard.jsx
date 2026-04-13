@@ -42,7 +42,7 @@ export default function Dashboard() {
     if (!flight) return;
 
     const hasMapCoords = Number.isFinite(Number(flight.lat)) && Number.isFinite(Number(flight.lng));
-    const hasDepartureCoords = !!flight.departure;
+    const hasDepartureCoords = /^[A-Z]{4}$/.test(String(flight.departure || ""));
     if (!hasMapCoords && !hasDepartureCoords) return;
 
     setSelectedFlight(id);
