@@ -40,7 +40,7 @@ function FlightRow({ flight, isSelected, onSelect, now }) {
         <div className="flex items-center gap-1">
           <CalendarDays className="w-3 h-3" />
           <span>{moment(flight.etd).format("DD MMM HH:mm")}Z</span>
-          {flight.etd && (() => {
+          {flight.etd && flight.status !== 'en-route' && (() => {
             const diffMs = new Date(flight.etd).getTime() - now;
             if (diffMs > 0) {
               const h = Math.floor(diffMs / 3600000);
