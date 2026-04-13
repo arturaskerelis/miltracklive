@@ -161,12 +161,16 @@ export function getMessageCategory(rawText) {
     return { label: "Medical Evacuation", color: "bg-red-500/20 text-red-300 border-red-500/30" };
   }
 
+  if (text.includes("METAR") || text.includes("ATIS") || text.includes("TAF") || text.includes("WX")) {
+    return { label: "Weather", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" };
+  }
+
   if (text.includes("WX DIVERT") || text.includes("DIVERT")) {
-    return { label: "Weather Diversion", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" };
+    return { label: "Weather Diversion", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" };
   }
 
   if (text.includes("TURB") || text.includes("DESCEND REQ")) {
-    return { label: "Turbulence / Altitude Change", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" };
+    return { label: "Turbulence / Altitude Change", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" };
   }
 
   if (text.includes("AR COMPLETE") || text.includes("OFFLOAD") || text.includes("RCVR")) {
