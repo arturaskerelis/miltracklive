@@ -1,4 +1,5 @@
 import { Sparkles, Clock } from "lucide-react";
+import { useState, useRef } from "react";
 import useNow from "../hooks/useNow";
 import { formatInTZ } from "../hooks/useZuluClock";
 import { relativeTime } from "../lib/relativeTime";
@@ -23,16 +24,29 @@ function extractCallsignFromRawText(rawText = "") {
 
 export default function MessageCard({ message, flight, isHighlighted, onClick, timezone = "UTC" }) {
   const now = useNow();
+  const [showRaw, setShowRaw] = useState(false);
+  const hoverTimer = useRef(null);
   const decoded = message.decoded || decodeMessage(message.rawText);
   const category = getMessageCategory(message.rawText);
   const displayCallsign = message.callsign && message.callsign !== "UNKNWN"
     ? message.callsign
     : extractCallsignFromRawText(message.rawText);
 
+  const handleMouseEnter = () => {
+    hoverTimer.current = setTimeout(() => setShowRaw(true), 500);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(hoverTimer.current);
+    setShowRaw(false);
+  };
+
   return (
     <button
       id={`message-${message.id}`}
       onClick={() => onClick?.(message)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`w-full text-left p-3 border-b border-border/50 transition-all hover:bg-muted/40 ${
         isHighlighted ? "bg-primary/5 border-l-2 border-l-primary" : ""
       }`}
@@ -75,6 +89,15 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
           {decoded}
         </p>
       </div>
+
+      {showRaw && message.rawText && (
+        <div className="mt-2 flex items-start gap-2">
+          <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">RAW</span>
+          <p className="text-xs font-mono leading-relaxed text-muted-foreground break-all">
+            {message.rawText.replace(/^FTX\/ID\s*/i, '')}
+          </p>
+        </div>
+      )}
     </button>
   );
 }
