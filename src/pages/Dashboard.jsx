@@ -22,7 +22,8 @@ export default function Dashboard() {
   const filteredMessages = allMessages;
 
   const handleSelectFlight = (id) => {
-    setSelectedFlight((prev) => (prev === id ? null : id));
+    if (!id) return;
+    setSelectedFlight(id);
 
     const relatedMessage = allMessages
       .filter((message) => message.flightPlanId === id)
@@ -38,7 +39,7 @@ export default function Dashboard() {
 
   const handleMessageClick = (msg) => {
     if (msg.flightPlanId) {
-      setSelectedFlight(msg.flightPlanId);
+      handleSelectFlight(msg.flightPlanId);
     }
   };
 

@@ -89,7 +89,8 @@ export default function useAirframesData() {
           console.warn('ADSB enrich failed:', e.message);
         }
 
-        const callsignToId = new Map(parsedFlights.map((f) => [f.callsign, f.id]));
+        const normalizeCallsign = (value) => String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const callsignToId = new Map(parsedFlights.map((f) => [normalizeCallsign(f.callsign), f.id]));
         // Deduplicate FTX messages by content, since Airframes can return the same message from multiple stations
         const seenFtxKeys = new Set();
         const uniqueFtxRaw = ftxRaw.filter((msg) => {
@@ -103,7 +104,7 @@ export default function useAirframesData() {
           const parsedMessage = parseFTXtoMessage(msg, null);
           return {
             ...parsedMessage,
-            flightPlanId: callsignToId.get(parsedMessage.callsign) || null,
+            flightPlanId: callsignToId.get(normalizeCallsign(parsedMessage.callsign)) || null,
           };
         });
 
