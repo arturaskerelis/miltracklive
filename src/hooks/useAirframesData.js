@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { base44 as base44Client } from '@/api/base44Client';
 import {
   fetchINIMessages,
   fetchFTXMessages,
   parseINItoFlightPlan,
   parseFTXtoMessage,
 } from "../lib/airframesService";
-import { base44 } from '@/api/base44Client';
+
 import { flightPlans as mockFlights, freeTextMessages as mockMessages } from "../lib/mockData";
 
 const POLL_INTERVAL = 6 * 60; // 6 minutes in seconds (2 calls × 250 = 500/day)
@@ -42,7 +43,7 @@ export default function useAirframesData() {
         // Enrich with live ADSB data from adsb.lol
         try {
           const callsigns = parsedFlights.map((f) => f.callsign);
-          const enrichRes = await base44.functions.invoke('adsbEnrich', { callsigns });
+          const enrichRes = await base44Client.functions.invoke('adsbEnrich', { callsigns });
           const adsbMap = enrichRes.data?.results || {};
           parsedFlights.forEach((fp) => {
             const ac = adsbMap[fp.callsign];
@@ -68,6 +69,22 @@ export default function useAirframesData() {
           const callsign = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').toUpperCase();
           return parseFTXtoMessage(msg, callsignToId.get(callsign) || null);
         });
+
+        // Batch AI-decode the real ACARS messages
+        try {
+          const toDecodeSlice = parsedMessages.slice(0, 30);
+          const texts = toDecodeSlice.map((m) => m.rawText);
+          const result = await base44Client.integrations.Core.InvokeLLM({
+            prompt: `You are a military ACARS message decoder. Translate each of the following raw ACARS messages into a single clear, plain-English sentence for ground crew. Be concise. Return a JSON object with key "decoded" being an array of strings, one per message in the same order.\n\nMessages:\n${texts.map((t, i) => `${i}: ${t}`).join('\n')}`,
+            response_json_schema: { type: 'object', properties: { decoded: { type: 'array', items: { type: 'string' } } } }
+          });
+          const decodedList = result?.decoded || [];
+          decodedList.forEach((text, i) => {
+            if (text && toDecodeSlice[i]) toDecodeSlice[i].decoded = text;
+          });
+        } catch (e) {
+          console.warn('AI decode failed:', e.message);
+        }
 
         setFlights(parsedFlights.length > 0 ? parsedFlights : mockFlights);
         setMessages(parsedMessages.length > 0 ? parsedMessages : mockMessages);

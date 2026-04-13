@@ -8,7 +8,7 @@ import moment from "moment";
 
 export default function MessageCard({ message, flight, isHighlighted, onClick, timezone = "UTC" }) {
   const now = useNow();
-  const decoded = decodeMessage(message.rawText);
+  const decoded = message.decoded || decodeMessage(message.rawText);
   const category = getMessageCategory(message.rawText);
 
   return (
