@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from "react-leaflet";
 import { Crosshair } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import L from "leaflet";
@@ -88,6 +88,14 @@ function FlyToSelected({ flights, selectedFlight }) {
   return null;
 }
 
+function ClearSelectionOnMapClick({ onClearSelection }) {
+  useMapEvents({
+    click: () => onClearSelection?.(),
+  });
+
+  return null;
+}
+
 const militaryBases = {
   KDOV: [39.1296, -75.4668],
   KWRI: [40.0156, -74.5936],
@@ -151,6 +159,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         <FlyToSelected flights={flights} selectedFlight={selectedFlight} />
+        <ClearSelectionOnMapClick onClearSelection={() => onSelectFlight(null)} />
 
         {/* Route lines for ACARS flights */}
         {enRouteFlights.map((flight) => {
