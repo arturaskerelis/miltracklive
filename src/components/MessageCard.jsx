@@ -81,7 +81,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
         </div>
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground flex-wrap">
           <Clock className="w-3 h-3" />
-          <span>{formatInTZ(message.timestamp, timezone, "DD MMM HH:mm:ss")}</span>
+          <span>{formatInTZ(message.timestamp, timezone, "DD MMM HH:mm:ss")} {timezone === "UTC" ? "Z" : timezone}</span>
           {relativeTime(message.timestamp, now) && (
             <span className="opacity-50">· {relativeTime(message.timestamp, now)}</span>
           )}

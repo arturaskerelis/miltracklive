@@ -54,7 +54,7 @@ export default function FreeTextFeed({ messages, flights = [], selectedFlight, o
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
           <Badge variant="outline" className="font-mono text-[10px]">
-            FTX/ID
+            FTX/ID · {timezone === "UTC" ? "Z" : timezone}
           </Badge>
         </div>
       </div>
