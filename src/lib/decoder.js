@@ -148,21 +148,62 @@ export function decodeMessage(rawText) {
 
 export function getMessageCategory(rawText) {
   const text = rawText.toUpperCase();
-  if (text.includes("MAINT") || text.includes("HYD") || text.includes("ENG") || text.includes("OIL"))
-    return { label: "Maintenance", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" };
-  if (text.includes("MEDEVAC") || text.includes("PATIENT") || text.includes("SURG") || text.includes("VITALS"))
-    return { label: "Medical", color: "bg-red-500/20 text-red-300 border-red-500/30" };
-  if (text.includes("WX") || text.includes("DIVERT") || text.includes("TURB") || text.includes("METAR") || text.includes("ATIS"))
-    return { label: "Weather", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" };
-  if (text.includes(" AR ") || text.includes("AR TRACK") || text.includes("AR COMPLETE") || text.includes("BOOM") || text.includes("OFFLOAD") || text.includes("RCVR") || text.includes("ANCHOR"))
-    return { label: "Aerial Refueling", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
-  if (text.includes("CARGO") || text.includes("LOAD") || text.includes("PALLET"))
-    return { label: "Cargo", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" };
-  if (text.includes("POS RPT") || text.includes("FL"))
-    return { label: "Position", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
-  if (text.includes("CLASSIFIED") || text.includes("SIPR") || text.includes("BUOY"))
-    return { label: "Intelligence", color: "bg-rose-500/20 text-rose-300 border-rose-500/30" };
-  if (text.includes("CREW") || text.includes("DUTY") || text.includes("REST"))
-    return { label: "Crew Status", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" };
-  return { label: "General", color: "bg-muted text-muted-foreground" };
+
+  if (text.includes("HYD") || text.includes("MLG") || text.includes("NLG") || text.includes("MAINT REQ")) {
+    return { label: "Hydraulic / Landing Gear", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" };
+  }
+
+  if (text.includes("ENG") || text.includes("OIL PRESS") || text.includes("OIL") || text.includes("TEMP")) {
+    return { label: "Engine / Oil System", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" };
+  }
+
+  if (text.includes("MEDEVAC") || text.includes("PATIENT") || text.includes("SURG") || text.includes("VITALS")) {
+    return { label: "Medical Evacuation", color: "bg-red-500/20 text-red-300 border-red-500/30" };
+  }
+
+  if (text.includes("WX DIVERT") || text.includes("DIVERT")) {
+    return { label: "Weather Diversion", color: "bg-sky-500/20 text-sky-300 border-sky-500/30" };
+  }
+
+  if (text.includes("TURB") || text.includes("DESCEND REQ")) {
+    return { label: "Turbulence / Altitude Change", color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" };
+  }
+
+  if (text.includes("AR COMPLETE") || text.includes("OFFLOAD") || text.includes("RCVR")) {
+    return { label: "Refueling Complete", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
+  }
+
+  if (text.includes("AR TRACK") || text.includes("ANCHOR") || text.includes("ON STA")) {
+    return { label: "Tanker On-Station", color: "bg-violet-500/20 text-violet-300 border-violet-500/30" };
+  }
+
+  if (text.includes("BOOM") || text.includes("RECONTACT") || text.includes("COMSEC")) {
+    return { label: "Refueling Interruption", color: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30" };
+  }
+
+  if (text.includes("CARGO MANIFEST") || text.includes("AMMO") || text.includes("RESUPPLY")) {
+    return { label: "Cargo / Resupply", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
+  }
+
+  if (text.includes("LOADMASTER") || text.includes("PALLET") || text.includes("CARGO SHIFT")) {
+    return { label: "Cargo Restraint Issue", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" };
+  }
+
+  if (text.includes("POS RPT") || text.includes("ETA ")) {
+    return { label: "Position Report", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
+  }
+
+  if (text.includes("CLASSIFIED") || text.includes("SIPR") || text.includes("SURFACE CONTACT")) {
+    return { label: "Classified Contact Report", color: "bg-rose-500/20 text-rose-300 border-rose-500/30" };
+  }
+
+  if (text.includes("BUOY") || text.includes("PATTERN") || text.includes("DEPLOYED")) {
+    return { label: "Sonobuoy Deployment", color: "bg-pink-500/20 text-pink-300 border-pink-500/30" };
+  }
+
+  if (text.includes("CREW REST") || text.includes("DUTY LIM") || text.includes("CREW")) {
+    return { label: "Crew Duty / Rest", color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" };
+  }
+
+  return { label: "Operational Update", color: "bg-muted text-muted-foreground" };
 }
