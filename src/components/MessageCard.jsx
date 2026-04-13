@@ -63,9 +63,9 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
           <span className="font-mono font-semibold text-sm text-foreground">
             {displayCallsign}
           </span>
-          {flight?.lat && flight?.lng && (
+          {flight?.status === "en-route" && Number.isFinite(Number(flight?.lat)) && Number.isFinite(Number(flight?.lng)) && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-cyan-500/30 text-cyan-400">
-              MAP
+              Live
             </Badge>
           )}
           {flight && (
