@@ -33,13 +33,13 @@ function getTail(msg) {
 // Fetch INI (flight plan / position init) messages via backend proxy
 export async function fetchINIMessages() {
   const res = await base44.functions.invoke('airframesProxy', { type: 'INI' });
-  return (res.data?.messages || []).filter((m) => isMilitary(getCallsign(m)));
+  return res.data?.messages || [];
 }
 
 // Fetch FTX (free text) messages via backend proxy
 export async function fetchFTXMessages() {
   const res = await base44.functions.invoke('airframesProxy', { type: 'FTX' });
-  return (res.data?.messages || []).filter((m) => isMilitary(getCallsign(m)));
+  return res.data?.messages || [];
 }
 
 // Parse an INI message into a flight plan object

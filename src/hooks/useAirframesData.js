@@ -25,7 +25,7 @@ export default function useAirframesData() {
       const [iniRaw, ftxRaw] = await Promise.all([fetchINIMessages(), fetchFTXMessages()]);
 
       if (iniRaw.length === 0 && ftxRaw.length === 0) {
-        setError("No live military traffic found — showing demo data");
+        setError("No live data returned — showing demo data");
         setIsLive(false);
       } else {
         const flightMap = new Map();
@@ -45,7 +45,7 @@ export default function useAirframesData() {
 
         setFlights(parsedFlights.length > 0 ? parsedFlights : mockFlights);
         setMessages(parsedMessages.length > 0 ? parsedMessages : mockMessages);
-        setIsLive(parsedFlights.length > 0);
+        setIsLive(true);
         setError(null);
       }
       setLastRefresh(new Date().toISOString());
