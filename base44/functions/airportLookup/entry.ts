@@ -7,13 +7,38 @@ Deno.serve(async (req) => {
       return Response.json({ airports: {} });
     }
 
-    const response = await fetch('https://davidmegginson.github.io/ourairports-data/airports.csv');
-    if (!response.ok) {
-      return Response.json({ airports: {}, error: `Airport source returned ${response.status}` }, { status: 200 });
+    const cacheUrl = 'https://davidmegginson.github.io/ourairports-data/airports.csv';
+    const cacheKey = 'miltrack-airports-cache-v1';
+    const cachePath = `/tmp/${cacheKey}.csv`;
+    const metaPath = `/tmp/${cacheKey}.json`;
+    const cacheMaxAgeMs = 1000 * 60 * 60 * 24 * 7;
+
+    let csv = null;
+
+    try {
+      const metaRaw = await Deno.readTextFile(metaPath);
+      const meta = JSON.parse(metaRaw);
+      const isFresh = meta.cachedAt && (Date.now() - meta.cachedAt < cacheMaxAgeMs);
+      if (isFresh) {
+        csv = await Deno.readTextFile(cachePath);
+      }
+    } catch {
+      // cache miss, continue to network fetch
     }
 
-    const csv = await response.text();
+    if (!csv) {
+      const response = await fetch(cacheUrl);
+      if (!response.ok) {
+        return Response.json({ airports: {}, error: `Airport source returned ${response.status}` }, { status: 200 });
+      }
+
+      csv = await response.text();
+      await Deno.writeTextFile(cachePath, csv);
+      await Deno.writeTextFile(metaPath, JSON.stringify({ cachedAt: Date.now() }));
+    }
+
     const rows = csv.split(/\r?\n/);
+    const requestedCodes = new Set(normalizedCodes);
     const airports = {};
 
     for (let i = 1; i < rows.length; i += 1) {
@@ -28,11 +53,11 @@ Deno.serve(async (req) => {
 
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) continue;
 
-      if (gpsCode && normalizedCodes.includes(gpsCode) && !airports[gpsCode]) {
+      if (gpsCode && requestedCodes.has(gpsCode) && !airports[gpsCode]) {
         airports[gpsCode] = [latitude, longitude];
       }
 
-      if (iataCode && normalizedCodes.includes(iataCode) && !airports[iataCode]) {
+      if (iataCode && requestedCodes.has(iataCode) && !airports[iataCode]) {
         airports[iataCode] = [latitude, longitude];
       }
 
