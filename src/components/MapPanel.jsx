@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from "react-leaflet";
 import { Crosshair } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import airportCoordinates from "../lib/airportCoordinates";
 import L from "leaflet";
 
 // Fix default marker icon
@@ -96,23 +97,7 @@ function ClearSelectionOnMapClick({ onClearSelection }) {
   return null;
 }
 
-const militaryBases = {
-  KDOV: [39.1296, -75.4668],
-  KWRI: [40.0156, -74.5936],
-  ETAR: [49.4369, 7.6003],
-  LTAN: [37.0021, 35.4259],
-  OKBK: [29.2267, 47.9689],
-  OAIX: [34.9461, 69.2650],
-  PGUA: [13.5840, 144.9248],
-  RJTY: [35.7485, 139.3487],
-  PHIK: [21.3187, -157.9224],
-  KBAD: [32.5012, -93.6627],
-  KNKX: [32.8684, -117.1424],
-  KLFI: [37.0829, -76.3605],
-  EGVN: [51.7500, -1.5836],
-  LICZ: [37.4017, 14.9224],
-  OAKN: [31.5058, 65.8478],
-};
+const militaryBases = airportCoordinates;
 
 export default function MapPanel({ flights, messages = [], selectedFlight, onSelectFlight }) {
   const [liveAircraft, setLiveAircraft] = useState([]);
