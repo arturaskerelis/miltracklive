@@ -6,6 +6,7 @@ import {
   parseINItoFlightPlan,
   parseFTXtoMessage,
 } from "../lib/airframesService";
+import airportCoordinates from "../lib/airportCoordinates";
 
 const STORAGE_KEY = "miltrack-live-cache";
 
@@ -56,7 +57,20 @@ export default function useAirframesData() {
             flightMap.set(fp.callsign, fp);
           }
         });
-        const parsedFlights = Array.from(flightMap.values());
+        const parsedFlights = Array.from(flightMap.values()).map((flight) => {
+          if (!Number.isFinite(Number(flight.lat)) || !Number.isFinite(Number(flight.lng))) {
+            const originCoords = airportCoordinates[flight.departure];
+            if (originCoords) {
+              return {
+                ...flight,
+                lat: originCoords[0],
+                lng: originCoords[1],
+              };
+            }
+          }
+
+          return flight;
+        });
 
         // Enrich with live ADSB data from adsb.lol
         try {
