@@ -16,11 +16,23 @@ function isMilitary(callsign) {
 
 // Extract callsign string from message (API returns nested flight object)
 function getCallsign(msg) {
-  if (!msg || msg.flight == null) return '';
-  if (typeof msg.flight === 'object') {
-    return msg.flight.flight || msg.flight.flightIcao || '';
+  if (!msg) return '';
+  if (msg.flight != null) {
+    if (typeof msg.flight === 'object') {
+      const nestedCallsign = msg.flight.flight || msg.flight.flightIcao || '';
+      if (nestedCallsign) return nestedCallsign;
+    } else if (String(msg.flight).trim()) {
+      return String(msg.flight);
+    }
   }
-  return String(msg.flight);
+
+  const text = (msg.text || '').trim();
+  const structuredHeaderMatch = text.match(/^([A-Z0-9]+),([A-Z0-9]{3,12}),(\d{12})\/([A-Z0-9]+),\//i);
+  if (structuredHeaderMatch) {
+    return structuredHeaderMatch[2];
+  }
+
+  return '';
 }
 
 function getHex(msg) {
