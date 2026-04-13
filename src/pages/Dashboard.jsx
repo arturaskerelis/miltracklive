@@ -37,6 +37,14 @@ export default function Dashboard() {
 
   const handleSelectFlight = (id) => {
     if (!id) return;
+
+    const flight = allFlights.find((item) => item.id === id);
+    if (!flight) return;
+
+    const hasMapCoords = Number.isFinite(Number(flight.lat)) && Number.isFinite(Number(flight.lng));
+    const hasDepartureCoords = !!flight.departure;
+    if (!hasMapCoords && !hasDepartureCoords) return;
+
     setSelectedFlight(id);
 
     const relatedMessage = allMessages

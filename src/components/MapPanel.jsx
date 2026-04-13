@@ -90,13 +90,13 @@ function FlyToSelected({ flights, selectedFlight }) {
     if (!selectedFlight) return;
 
     const flight = flights.find((f) => f.id === selectedFlight);
-    if (!flight) return;
+    const target = flight && hasValidCoords(flight.lat, flight.lng)
+      ? toLatLng(flight.lat, flight.lng)
+      : null;
 
-    const lat = Number(flight.lat);
-    const lng = Number(flight.lng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (!target || target.some((value) => !Number.isFinite(value))) return;
 
-    map.flyTo([lat, lng], 5, { duration: 1 });
+    map.flyTo(target, 5, { duration: 1 });
   }, [selectedFlight, flights, map]);
   return null;
 }
