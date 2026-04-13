@@ -65,7 +65,7 @@ export default function useAirframesData() {
 
         const callsignToId = new Map(parsedFlights.map((f) => [f.callsign, f.id]));
         const parsedMessages = ftxRaw.map((msg) => {
-          const callsign = (typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight || '').toUpperCase();
+          const callsign = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').toUpperCase();
           return parseFTXtoMessage(msg, callsignToId.get(callsign) || null);
         });
 
