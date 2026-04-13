@@ -20,12 +20,14 @@ Deno.serve(async (req) => {
     const textSearch = type === "FTX" ? "ftx/id" : "ini/id";
     const url = `${AIRFRAMES_BASE}/messages?text=${encodeURIComponent(textSearch)}&timeframe=last-week&exclude_errors=3&exclude_labels=_d,Q0&limit=100`;
 
-    const response = await fetch(url, {
-      headers: {
-        "Accept": "application/json",
-        "User-Agent": "MilTrackLive/1.0",
-      },
-    });
+    const apiKey = Deno.env.get("AIRFRAMES_API_KEY");
+    const headers = {
+      "Accept": "application/json",
+      "User-Agent": "MilTrackLive/1.0",
+    };
+    if (apiKey) headers["X-Api-Key"] = apiKey;
+
+    const response = await fetch(url, { headers });
 
     if (!response.ok) {
       const text = await response.text();
