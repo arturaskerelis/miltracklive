@@ -8,8 +8,6 @@ import moment from "moment";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("map");
-  const [branchFilter, setBranchFilter] = useState("all");
-  const [missionFilter, setMissionFilter] = useState("all");
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { flights: allFlights, messages: allMessages, isLive, error, countdown, refetch } = useAirframesData();
@@ -20,18 +18,8 @@ export default function Dashboard() {
     setIsRefreshing(false);
   };
 
-  const filteredFlights = useMemo(() => {
-    return allFlights.filter((f) => {
-      if (branchFilter !== "all" && f.branch !== branchFilter) return false;
-      if (missionFilter !== "all" && f.missionType !== missionFilter) return false;
-      return true;
-    });
-  }, [branchFilter, missionFilter]);
-
-  const filteredMessages = useMemo(() => {
-    const flightIds = new Set(filteredFlights.map((f) => f.id));
-    return allMessages.filter((m) => flightIds.has(m.flightPlanId));
-  }, [filteredFlights, allMessages]);
+  const filteredFlights = allFlights;
+  const filteredMessages = allMessages;
 
   const handleSelectFlight = (id) => {
     setSelectedFlight((prev) => (prev === id ? null : id));
@@ -46,10 +34,6 @@ export default function Dashboard() {
       <TopBar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        branchFilter={branchFilter}
-        onBranchFilterChange={setBranchFilter}
-        missionFilter={missionFilter}
-        onMissionFilterChange={setMissionFilter}
         flightCount={filteredFlights.length}
         messageCount={filteredMessages.length}
         isLive={isLive}
