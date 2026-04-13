@@ -40,9 +40,15 @@ function FlightRow({ flight, isSelected, onSelect, now }) {
         <div className="flex items-center gap-1">
           <CalendarDays className="w-3 h-3" />
           <span>{moment(flight.etd).format("DD MMM HH:mm")}Z</span>
-          {relativeTime(flight.etd, now) && (
-            <span className="opacity-50">· {relativeTime(flight.etd, now)}</span>
-          )}
+          {flight.etd && (() => {
+            const diffMs = new Date(flight.etd).getTime() - now;
+            if (diffMs > 0) {
+              const h = Math.floor(diffMs / 3600000);
+              const m = Math.floor((diffMs % 3600000) / 60000);
+              return <span className="opacity-60">· initiates in {h > 0 ? `${h}h ` : ''}{m}m</span>;
+            }
+            return <span className="opacity-50">· {relativeTime(flight.etd, now)}</span>;
+          })()}
           {flight.altitude > 0 && (
             <><span className="opacity-40 mx-1">·</span><span>FL{Math.round(flight.altitude / 100)}</span></>
           )}
