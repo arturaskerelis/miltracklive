@@ -76,13 +76,21 @@ function getBranchHexColor(branch) {
   }
 }
 
+function hasValidCoords(lat, lng) {
+  return Number.isFinite(Number(lat)) && Number.isFinite(Number(lng));
+}
+
+function toLatLng(lat, lng) {
+  return [Number(lat), Number(lng)];
+}
+
 function FlyToSelected({ flights, selectedFlight }) {
   const map = useMap();
   useEffect(() => {
     if (selectedFlight) {
       const flight = flights.find((f) => f.id === selectedFlight);
-      if (flight && flight.lat && flight.lng) {
-        map.flyTo([flight.lat, flight.lng], 5, { duration: 1 });
+      if (flight && hasValidCoords(flight.lat, flight.lng)) {
+        map.flyTo(toLatLng(flight.lat, flight.lng), 5, { duration: 1 });
       }
     }
   }, [selectedFlight, flights, map]);
@@ -148,7 +156,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
 
   const allAirports = useMemo(() => ({ ...airportCoordinates, ...dynamicAirports }), [dynamicAirports]);
 
-  const enRouteFlights = flights.filter((f) => f.status === "en-route" && f.lat && f.lng);
+  const enRouteFlights = flights.filter((f) => f.status === "en-route" && hasValidCoords(f.lat, f.lng));
   const filedFlights = flights.filter((f) => f.status === "filed" && allAirports[f.departure]);
   const selectedFlightData = flights.find((flight) => flight.id === selectedFlight) || null;
   const selectedRoutePositions = useMemo(() => {
@@ -156,20 +164,20 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
 
     const departureCoords = allAirports[selectedFlightData.departure];
     const destinationCoords = allAirports[selectedFlightData.destination];
-    const hasLivePosition = selectedFlightData.lat && selectedFlightData.lng;
+    const hasLivePosition = hasValidCoords(selectedFlightData.lat, selectedFlightData.lng);
 
     if (departureCoords && destinationCoords) {
       return hasLivePosition
-        ? [departureCoords, [selectedFlightData.lat, selectedFlightData.lng], destinationCoords]
+        ? [departureCoords, toLatLng(selectedFlightData.lat, selectedFlightData.lng), destinationCoords]
         : [departureCoords, destinationCoords];
     }
 
     if (hasLivePosition && departureCoords) {
-      return [departureCoords, [selectedFlightData.lat, selectedFlightData.lng]];
+      return [departureCoords, toLatLng(selectedFlightData.lat, selectedFlightData.lng)];
     }
 
     if (hasLivePosition && destinationCoords) {
-      return [[selectedFlightData.lat, selectedFlightData.lng], destinationCoords];
+      return [toLatLng(selectedFlightData.lat, selectedFlightData.lng), destinationCoords];
     }
 
     return null;
@@ -180,7 +188,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   const enRouteCallsigns = new Set(enRouteFlights.map(f => f.callsign.toUpperCase()));
   const extraAircraft = liveAircraft.filter(ac => {
     const cs = (ac.flight || ac.hex || '').trim().toUpperCase();
-    return !enRouteCallsigns.has(cs);
+    return hasValidCoords(ac.lat, ac.lon) && !enRouteCallsigns.has(cs);
   });
 
   return (
@@ -206,7 +214,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
         {enRouteFlights.map((flight) => (
           <Marker
             key={flight.id}
-            position={[flight.lat, flight.lng]}
+            position={toLatLng(flight.lat, flight.lng)}
             zIndexOffset={selectedFlight === flight.id ? 1000 : 0}
             icon={createAircraftIcon(
               getBranchHexColor(flight.branch),
@@ -285,7 +293,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           return (
             <Marker
               key={ac.hex || callsign}
-              position={[ac.lat, ac.lon]}
+              position={toLatLng(ac.lat, ac.lon)}
               icon={createAircraftIcon('#94a3b8', false, callsign, ac.t)}
             >
               <Popup>
