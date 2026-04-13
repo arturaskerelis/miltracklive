@@ -70,9 +70,9 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
             {category.label}
           </Badge>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 flex-wrap justify-end">
           <Clock className="w-3 h-3" />
-          {formatInTZ(message.timestamp, timezone, "HH:mm:ss")}
+          <span>{formatInTZ(message.timestamp, timezone, "DD MMM HH:mm:ss")}</span>
           {relativeTime(message.timestamp, now) && (
             <span className="opacity-50">· {relativeTime(message.timestamp, now)}</span>
           )}
