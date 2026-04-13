@@ -42,6 +42,7 @@ export default function MessageCard({ message, flight, isHighlighted, onClick, t
 
   return (
     <button
+      id={`message-${message.id}`}
       onClick={() => onClick?.(message)}
       className={`w-full text-left p-3 border-b border-border/50 transition-all hover:bg-muted/40 ${
         isHighlighted ? "bg-primary/5 border-l-2 border-l-primary" : ""

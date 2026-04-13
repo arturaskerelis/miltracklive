@@ -23,6 +23,17 @@ export default function Dashboard() {
 
   const handleSelectFlight = (id) => {
     setSelectedFlight((prev) => (prev === id ? null : id));
+
+    const relatedMessage = allMessages
+      .filter((message) => message.flightPlanId === id)
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+
+    if (relatedMessage) {
+      const messageElement = document.getElementById(`message-${relatedMessage.id}`);
+      if (messageElement) {
+        messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
   };
 
   const handleMessageClick = (msg) => {
