@@ -102,7 +102,6 @@ const militaryBases = airportCoordinates;
 export default function MapPanel({ flights, messages = [], selectedFlight, onSelectFlight }) {
   const [liveAircraft, setLiveAircraft] = useState([]);
   const [dynamicAirports, setDynamicAirports] = useState({});
-  const [hoveredFlight, setHoveredFlight] = useState(null);
 
   useEffect(() => {
     async function fetchMil() {
@@ -144,7 +143,6 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
   const flightsWithKnownRoutes = flights.filter((f) => allAirports[f.departure] && allAirports[f.destination]);
   const filedFlights = flights.filter((f) => f.status === "filed" && allAirports[f.departure]);
   const selectedKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === selectedFlight);
-  const hoveredKnownRouteFlight = flightsWithKnownRoutes.find((flight) => flight.id === hoveredFlight);
   const flightIdsWithFtx = new Set(messages.filter((message) => message.flightPlanId).map((message) => message.flightPlanId));
 
   // Deduplicate: skip liveAircraft already shown via ACARS-enriched flights
@@ -238,7 +236,7 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
               zIndexOffset={selectedFlight === flight.id ? 900 : 100}
               icon={createAircraftIcon(
                 getBranchHexColor(flight.branch),
-                selectedFlight === flight.id || hoveredFlight === flight.id,
+                selectedFlight === flight.id,
                 flight.callsign,
                 flight.aircraftType,
                 [{ label: 'INI', border: 'rgba(96,165,250,0.35)', text: '#93c5fd', background: 'rgba(59,130,246,0.12)' }],
@@ -246,8 +244,6 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
               )}
               eventHandlers={{
                 click: () => onSelectFlight(flight.id),
-                mouseover: () => setHoveredFlight(flight.id),
-                mouseout: () => setHoveredFlight((current) => current === flight.id ? null : current),
               }}
             >
               <Popup className="military-popup">
@@ -317,27 +313,6 @@ export default function MapPanel({ flights, messages = [], selectedFlight, onSel
           />
         )}
 
-        {!selectedKnownRouteFlight && hoveredKnownRouteFlight && (
-          <Polyline
-            key={`hovered-route-${hoveredKnownRouteFlight.id}`}
-            positions={hoveredKnownRouteFlight.lat && hoveredKnownRouteFlight.lng
-              ? [
-                  allAirports[hoveredKnownRouteFlight.departure],
-                  [hoveredKnownRouteFlight.lat, hoveredKnownRouteFlight.lng],
-                  allAirports[hoveredKnownRouteFlight.destination],
-                ]
-              : [
-                  allAirports[hoveredKnownRouteFlight.departure],
-                  allAirports[hoveredKnownRouteFlight.destination],
-                ]}
-            pathOptions={{
-              color: getBranchHexColor(hoveredKnownRouteFlight.branch),
-              weight: 4,
-              opacity: 0.95,
-              dashArray: "6 6",
-            }}
-          />
-        )}
       </MapContainer>
 
       {/* Map overlay info */}
