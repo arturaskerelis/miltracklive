@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Radar, Sun, Moon, Plane, Radio, Map, RefreshCw, Clock } from "lucide-react";
+import { Radar, Sun, Moon, RefreshCw, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,8 +18,6 @@ function formatCountdown(seconds) {
 }
 
 export default function TopBar({
-  activeTab,
-  onTabChange,
   flightCount,
   messageCount,
   isLive,
@@ -63,7 +61,7 @@ export default function TopBar({
         <SelectTrigger className="h-8 text-xs w-36 font-mono">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-[9999]">
           {TIMEZONES.map((tz) => (
             <SelectItem key={tz.value} value={tz.value} className="text-xs font-mono">
               {tz.label}
@@ -72,27 +70,7 @@ export default function TopBar({
         </SelectContent>
       </Select>
 
-      {/* Tabs */}
-      <nav className="flex items-center gap-1 border border-border rounded-lg p-0.5 bg-muted/50 ml-1">
-        {[
-          { id: "plans", icon: Plane, label: "Flight Plans" },
-          { id: "map", icon: Map, label: "Map View" },
-          { id: "freetext", icon: Radio, label: "Free Text" },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              activeTab === tab.id
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            }`}
-          >
-            <tab.icon className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{tab.label}</span>
-          </button>
-        ))}
-      </nav>
+
 
       {/* Stats + Controls */}
       <div className="ml-auto flex items-center gap-3">

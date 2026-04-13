@@ -7,7 +7,6 @@ import useAirframesData from "../hooks/useAirframesData";
 import moment from "moment";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("map");
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [timezone, setTimezone] = useState("UTC");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -33,8 +32,6 @@ export default function Dashboard() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       <TopBar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
         flightCount={filteredFlights.length}
         messageCount={filteredMessages.length}
         isLive={isLive}
@@ -49,7 +46,7 @@ export default function Dashboard() {
       {/* Desktop: 3-panel layout / Mobile: tab-based */}
       <div className="flex-1 overflow-hidden">
         {/* Desktop layout (hidden on mobile) */}
-        <div className="hidden lg:grid lg:grid-cols-12 h-full">
+        <div className="grid grid-cols-12 h-full">
           <div className="col-span-3 overflow-hidden">
             <FlightPlansPanel
               flights={filteredFlights}
@@ -76,33 +73,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Mobile layout (tab-based) */}
-        <div className="lg:hidden h-full">
-          {activeTab === "plans" && (
-            <FlightPlansPanel
-              flights={filteredFlights}
-              selectedFlight={selectedFlight}
-              onSelectFlight={handleSelectFlight}
-              timezone={timezone}
-            />
-          )}
-          {activeTab === "map" && (
-            <MapPanel
-              flights={filteredFlights}
-              selectedFlight={selectedFlight}
-              onSelectFlight={handleSelectFlight}
-            />
-          )}
-          {activeTab === "freetext" && (
-            <FreeTextFeed
-              messages={filteredMessages}
-              flights={filteredFlights}
-              selectedFlight={selectedFlight}
-              onMessageClick={handleMessageClick}
-              timezone={timezone}
-            />
-          )}
-        </div>
       </div>
     </div>
   );
