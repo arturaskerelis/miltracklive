@@ -8,9 +8,15 @@ import { decodeMessage, getMessageCategory } from "../lib/decoder";
 import moment from "moment";
 
 function extractCallsignFromRawText(rawText = "") {
-  const cleaned = rawText.replace(/^FTX\/ID\s*/i, '').trim();
-  const firstToken = cleaned.split(/\s+/)[0]?.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-  return firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken) ? firstToken : "UNKNWN";
+  const cleaned = rawText.replace(/^FTX\/ID\s*/i, '').trim().toUpperCase();
+  const tokens = cleaned
+    .split(/\s+/)
+    .map((token) => token.replace(/[^A-Z0-9]/g, ''))
+    .filter(Boolean);
+
+  const preferredToken = tokens.find((token) => /^[A-Z]{2,8}\d{1,4}[A-Z]?$/.test(token));
+  const fallbackToken = tokens.find((token) => /^[A-Z0-9]{3,12}$/.test(token));
+  return preferredToken || fallbackToken || "UNKNWN";
 }
 
 export default function MessageCard({ message, flight, isHighlighted, onClick, timezone = "UTC" }) {

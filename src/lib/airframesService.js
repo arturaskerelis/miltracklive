@@ -32,11 +32,20 @@ function getHex(msg) {
 
 function extractCallsignFromText(text) {
   const cleaned = (text || '').trim().toUpperCase();
-  const firstToken = cleaned.split(/\s+/)[0]?.replace(/[^A-Z0-9]/g, '');
-  if (firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken)) {
-    return firstToken;
-  }
-  return '';
+  const tokens = cleaned
+    .split(/\s+/)
+    .map((token) => token.replace(/[^A-Z0-9]/g, ''))
+    .filter(Boolean);
+
+  const preferredToken = tokens.find((token) =>
+    /^[A-Z]{2,8}\d{1,4}[A-Z]?$/.test(token) ||
+    MILITARY_CALLSIGNS.some((prefix) => token.startsWith(prefix))
+  );
+
+  if (preferredToken) return preferredToken;
+
+  const fallbackToken = tokens.find((token) => /^[A-Z0-9]{3,12}$/.test(token));
+  return fallbackToken || '';
 }
 
 // Extract tail from message
