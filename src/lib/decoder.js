@@ -135,12 +135,15 @@ export function decodeMessage(rawText) {
     }
   }
 
-  // Fallback: expand abbreviations word by word
+  // Fallback: expand abbreviations word by word, skip raw codes
   const words = cleaned.split(/\s+/);
   const expanded = words
-    .map((w) => abbreviations[w.toUpperCase()] || w)
-    .join(" ");
-  return `Message from the aircraft: ${expanded}. This appears to be a status update requiring ground coordination.`;
+    .map((w) => abbreviations[w.toUpperCase()] || null)
+    .filter(Boolean)
+    .join(", ");
+  return expanded
+    ? `Status update — ${expanded}.`
+    : "Aircraft status update. Awaiting full translation.";
 }
 
 export function getMessageCategory(rawText) {
