@@ -97,7 +97,7 @@ export function parseFTXtoMessage(msg, flightPlanId) {
   let callsign = getCallsign(msg).toUpperCase();
   if (!callsign) {
     const firstToken = text.split(/\s+/)[0];
-    if (firstToken && /^[A-Z0-9]{3,8}$/.test(firstToken)) callsign = firstToken;
+    if (firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken)) callsign = firstToken;
   }
   return {
     id: `ftx-${msg.id}`,

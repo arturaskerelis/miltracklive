@@ -72,7 +72,7 @@ export default function useAirframesData() {
           let cs = ((typeof msg.flight === 'object' ? msg.flight?.flight : msg.flight) || '').trim().toUpperCase();
           if (!cs) {
             const firstToken = (msg.text || '').trim().split(/\s+/)[0];
-            if (firstToken && /^[A-Z0-9]{3,8}$/.test(firstToken)) cs = firstToken;
+            if (firstToken && /^[A-Z0-9]{3,12}$/.test(firstToken)) cs = firstToken;
           }
           return parseFTXtoMessage(msg, callsignToId.get(cs) || null);
         });
